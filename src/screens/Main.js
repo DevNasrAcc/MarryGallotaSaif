@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, ImageBackground, Dimensions, Image } from 'react-native';
+
+import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
+
 import { Images } from '../assets'
 
 
@@ -11,9 +14,46 @@ export default Main = () => {
     const [description, setDescription] = useState();
 
 
-    useEffect(() =>{
+    useEffect(() => {
         console.warn('WelCome to Marry Gallota')
-    },[])
+    }, [])
+
+    const Capture = () => {
+        const options = {
+            mediaType: 'photo',
+            maxWidth: 300,
+            maxHeight: 550,
+            quality: 1,
+            videoQuality: 'low',
+            durationLimit: 30,
+            saveToPhotos: true,
+        };
+        launchCamera(options, (response) => {
+            console.log('Response = ', response);
+
+            if (response.didCancel) {
+                alert('User cancelled camera picker');
+                return;
+            } else if (response.errorCode == 'camera_unavailable') {
+                alert('Camera not available on device');
+                return;
+            } else if (response.errorCode == 'permission') {
+                alert('Permission not satisfied');
+                return;
+            } else if (response.errorCode == 'others') {
+                alert(response.errorMessage);
+                return;
+            }
+            console.log('base64 -> ', response.base64);
+            console.log('uri -> ', response.uri);
+            console.log('width -> ', response.width);
+            console.log('height -> ', response.height);
+            console.log('fileSize -> ', response.fileSize);
+            console.log('type -> ', response.type);
+            console.log('fileName -> ', response.fileName);
+            setSingleFile(response);
+        });
+    }
 
     const { mainContainerStyle, boxeViewStyle, buttonStyle, entriesViewStyle, entriesStyle } = styles;
     return (
@@ -23,7 +63,10 @@ export default Main = () => {
                 <ImageBackground source={Images.bg} style={{ width: width, height: height * 0.9 }} >
                     <View style={mainContainerStyle} >
                         <TouchableOpacity
-                            onPress={() => console.warn('Captured')}
+                            onPress={() => {
+                                Capture()
+                                console.warn('Captured')
+                            }}
                             style={buttonStyle} >
                             <Image
                                 source={Images.icon3}
