@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, ImageBackground, Dimensions, Image } from 'react-native';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 
 import { Images } from '../assets'
@@ -53,7 +53,27 @@ export default Main = () => {
             console.log('fileName -> ', response.fileName);
             setSingleFile(response);
         });
+    };
+
+    const onSave = async (value) => {
+        try {
+            const imageData = JSON.stringify(value)
+            await AsyncStorage.setItem('@images', imageData)
+        } catch (error) {
+            console.warn('Error', error.message)
+        }
     }
+
+
+    const getData = async () => {
+        try {
+            const jsonValue = await AsyncStorage.getItem('@storage_Key')
+            return jsonValue != null ? JSON.parse(jsonValue) : null;
+        } catch (error) {
+            console.warn('Error', error.message)
+        }
+    }
+
 
     const { mainContainerStyle, boxeViewStyle, buttonStyle, entriesViewStyle, entriesStyle } = styles;
     return (
@@ -110,7 +130,11 @@ export default Main = () => {
                             </View>
                         </View>
                         <TouchableOpacity
-                            onPress={() => console.warn('SAVED')}
+                            onPress={() => {
+                                onSave()
+                                console.warn('SAVED')
+                            }
+                            }
                             style={buttonStyle} >
                             <Image
                                 source={Images.icon2}
