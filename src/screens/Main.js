@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, ImageBackground, Dimensions, Image } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
-// import ImagePicker from 'react-native-image-picker';
 
 import { Images } from '../assets'
 
@@ -39,7 +38,7 @@ export default Main = () => {
             } else {
                 const source = { uri: response.uri };
                 console.warn(response)
-                  console.log('response', JSON.stringify(response));
+                console.log('response', JSON.stringify(response));
                 setPicture(response)
             }
         });
@@ -121,9 +120,10 @@ export default Main = () => {
                                 style={{ position: 'absolute', width: 30, height: 30, resizeMode: 'contain', top: 22, left: 25 }} /> */}
                         </TouchableOpacity>
                         <View style={boxeViewStyle}>
-                            <Text style={{ fontFamily: 'CenturyGothic', letterSpacing: 5, fontSize: 18, color: 'white' }}>
+                            {picture ? <Image source={{ uri: picture.uri }} style={{ height: height * 0.16, width: width * 0.6, borderRadius: 18, }} />
+                                : <Text style={{ fontFamily: 'CenturyGothic', letterSpacing: 5, fontSize: 18, color: 'white' }}>
                                 PICTURE
-                            </Text>
+                            </Text>}
                         </View>
                         <View>
                             <View style={entriesViewStyle}>
@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between'
     },
     boxeViewStyle: {
-        backgroundColor: '#333333', height: height * 0.16, width: width * 0.6, borderRadius: 25, alignItems: 'center', justifyContent: 'center'
+        backgroundColor: '#333333', height: height * 0.16, width: width * 0.6, borderRadius: 18, alignItems: 'center', justifyContent: 'center'
     },
     buttonStyle: {
         alignItems: 'center', justifyContent: 'center',
