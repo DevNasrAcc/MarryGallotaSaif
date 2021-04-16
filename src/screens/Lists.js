@@ -10,10 +10,7 @@ import { Images } from '../assets'
 const { width, height } = Dimensions.get('window');
 export default Lists = () => {
 
-
-
     const renderList = ({item}) => {
-        console.warn(item.name)
         return (
             <View style={{  flexDirection: 'row', marginTop: 40, alignItems: 'center', justifyContent: 'space-between', }}>
                 <TouchableOpacity style={{ marginStart: 10, alignItems: 'center', justifyContent: 'center', width: 55, height: 55, borderRadius: 10, backgroundColor: '#1BB81F' }}>
@@ -51,14 +48,21 @@ export default Lists = () => {
     }
     const obj = [
         {
-            name:'Picture 1'
+            name:'Picture 01'
         },
         {
-            name:'Picture 2'
+            name:'Picture 02'
         },
         {
-            name:'Picture 3'
-        }]
+            name:'Picture 03'
+        },
+        {
+            name:'Picture 04'
+        },
+        {
+            name:'Picture 05'
+        },
+    ]
     const { mainContainerStyle, boxeViewStyle, buttonStyle, entriesViewStyle, entriesStyle } = styles;
     return (
         <>
@@ -67,7 +71,7 @@ export default Lists = () => {
                 {/* <ImageBackground source={Images.bg} style={{ width: width, height: height * 0.9 }} > */}
                 <View style={mainContainerStyle}>
                     <TouchableOpacity
-                        onPress={() => captureImage('photo')}
+                        onPress={() => console.warn('Navigating to Home')}
                         style={buttonStyle} >
                         <Image
                             source={Images.icon4}
