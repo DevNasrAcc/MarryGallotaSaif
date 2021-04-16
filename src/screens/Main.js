@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, ImageBackground, Dimensions, Image } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
+// import ImagePicker from 'react-native-image-picker';
 
 import { Images } from '../assets'
 
@@ -9,7 +10,7 @@ import { Images } from '../assets'
 const { width, height } = Dimensions.get('window')
 export default Main = () => {
 
-    const [picture, setPicture] = useState();
+    const [picture, setPicture] = useState({});
     const [details, setDetails] = useState();
     const [description, setDescription] = useState();
 
@@ -18,43 +19,70 @@ export default Main = () => {
         console.warn('WelCome to Marry Gallota')
     }, [])
 
-    const Capture = () => {
-        const options = {
-            mediaType: 'photo',
-            maxWidth: 300,
-            maxHeight: 550,
-            quality: 1,
-            videoQuality: 'low',
-            durationLimit: 30,
-            saveToPhotos: true,
+    const captureImage = async (type) => {
+        let options = {
+            storageOptions: {
+                skipBackup: true,
+                path: 'images',
+            },
         };
         launchCamera(options, (response) => {
             console.log('Response = ', response);
 
             if (response.didCancel) {
-                alert('User cancelled camera picker');
-                return;
-            } else if (response.errorCode == 'camera_unavailable') {
-                alert('Camera not available on device');
-                return;
-            } else if (response.errorCode == 'permission') {
-                alert('Permission not satisfied');
-                return;
-            } else if (response.errorCode == 'others') {
-                alert(response.errorMessage);
-                return;
+                console.log('User cancelled image picker');
+            } else if (response.error) {
+                console.log('ImagePicker Error: ', response.error);
+            } else if (response.customButton) {
+                console.log('User tapped custom button: ', response.customButton);
+                alert(response.customButton);
+            } else {
+                const source = { uri: response.uri };
+                console.warn(response)
+                  console.log('response', JSON.stringify(response));
+                setPicture(response)
             }
-            console.log('base64 -> ', response.base64);
-            console.log('uri -> ', response.uri);
-            console.log('width -> ', response.width);
-            console.log('height -> ', response.height);
-            console.log('fileSize -> ', response.fileSize);
-            console.log('type -> ', response.type);
-            console.log('fileName -> ', response.fileName);
-            setSingleFile(response);
         });
     };
+    console.warn('Picture data', picture);
 
+    const requestExternalWritePermission = async () => {
+        if (Platform.OS === 'android') {
+            try {
+                const granted = await PermissionsAndroid.request(
+                    PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+                    {
+                        title: 'External Storage Write Permission',
+                        message: 'App needs write permission',
+                    },
+                );
+                // If WRITE_EXTERNAL_STORAGE Permission is granted
+                return granted === PermissionsAndroid.RESULTS.GRANTED;
+            } catch (err) {
+                console.warn(err);
+                alert('Write permission err', err);
+            }
+            return false;
+        } else return true;
+    };
+    const requestCameraPermission = async () => {
+        if (Platform.OS === 'android') {
+            try {
+                const granted = await PermissionsAndroid.request(
+                    PermissionsAndroid.PERMISSIONS.CAMERA,
+                    {
+                        title: 'Camera Permission',
+                        message: 'App needs camera permission',
+                    },
+                );
+                // If CAMERA Permission is granted
+                return granted === PermissionsAndroid.RESULTS.GRANTED;
+            } catch (err) {
+                console.warn(err);
+                return false;
+            }
+        } else return true;
+    };
     const onSave = async (value) => {
         try {
             const imageData = JSON.stringify(value)
@@ -78,15 +106,12 @@ export default Main = () => {
     const { mainContainerStyle, boxeViewStyle, buttonStyle, entriesViewStyle, entriesStyle } = styles;
     return (
         <>
-            <SafeAreaView style={{ flex: 0, backgroundColor: '#2C2C2C' }} />
-            <SafeAreaView style={{ flex: 1, backgroundColor: '#2C2C2C' }}>
+            <SafeAreaView style={{ flex: 0, backgroundColor: '#242423' }} />
+            <SafeAreaView style={{ flex: 1, backgroundColor: '#242423' }}>
                 <ImageBackground source={Images.bg} style={{ width: width, height: height * 0.9 }} >
                     <View style={mainContainerStyle} >
                         <TouchableOpacity
-                            onPress={() => {
-                                Capture()
-                                console.warn('Captured')
-                            }}
+                            onPress={() => captureImage('photo')}
                             style={buttonStyle} >
                             <Image
                                 source={Images.icon3}
