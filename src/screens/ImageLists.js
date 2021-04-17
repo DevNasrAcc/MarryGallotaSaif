@@ -116,6 +116,7 @@ const ImageLists = ({navigation}) => {
                     </TouchableOpacity>
                     <View style={{ flex: 1 }}>
                         <FlatList
+                        showsVerticalScrollIndicator={false}
                             keyExtractor={(it, ind) => ind}
                             data={obj}
                             renderItem={(i) => renderList(i)}

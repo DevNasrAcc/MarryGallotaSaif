@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, ImageBackground, Dimensions, Image, TextInput } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, ImageBackground, Dimensions, Image, TextInput,  } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
-
+import Modal from 'react-native-modal';
 import { Images } from '../assets'
 
 
@@ -12,7 +12,7 @@ const Dashboard = ({ navigation }) => {
     const [picture, setPicture] = useState({});
     const [details, setDetails] = useState();
     const [description, setDescription] = useState();
-    const [deleteModal, setDeleteModal]  = useState(false);
+    const [deleteModal, setDeleteModal] = useState(false);
 
 
     useEffect(() => {
@@ -114,6 +114,40 @@ const Dashboard = ({ navigation }) => {
             <SafeAreaView style={{ flex: 0, backgroundColor: '#242423' }} />
             <SafeAreaView style={{ flex: 1, backgroundColor: '#242423' }}>
                 <ImageBackground source={Images.bg} style={{ width: width, height: height * 0.9 }} >
+                    <Modal transparent={true} isVisible={deleteModal} onBackdropPres={deleteModal}s >
+                        <View
+                            style={{
+                                flex: 1,
+                                justifyContent: 'center',
+                                backgroundColor: '#000000aa',
+                                alignItems: 'center',
+                            }}>
+                            <View
+                                style={{
+                                    height: 260,
+                                    width: 260,
+                                    borderRadius: 200,
+                                    paddingVertical: 10,
+                                    justifyContent: 'space-around',
+                                    alignItems: 'center',
+                                    backgroundColor: '#1BB81F',
+                                    borderWidth: 10,
+                                    borderColor: '#139245',
+                                }}>
+                                <View style={{width:180,marginTop:20}}>
+                                    <Text style={{ fontSize: 16, textAlign: 'center', color: 'white'}}>{'Are you sure you want to delete this image?'}</Text>
+                                </View>
+                                <View style={{flexDirection: 'row' ,justifyContent: 'space-between', width:100}}>
+                                    <TouchableOpacity onPress={() => setDeleteModal(!deleteModal)}>
+                                        <Text style={{ fontFamily:'CenturyGothic', fontSize:18, color: 'white',letterSpacing:2}}>YES</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity onPress={() => setDeleteModal(!deleteModal)}>
+                                        <Text style={{ fontFamily:'CenturyGothic', fontSize:18, color: 'white',letterSpacing:2}}>NO</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        </View>
+                    </Modal>
                     <View style={mainContainerStyle} >
                         <TouchableOpacity
                             onPress={() => captureImage('photo')}
@@ -186,8 +220,8 @@ const Dashboard = ({ navigation }) => {
                                     SAVE
                             </Text>
                             </TouchableOpacity>
-                            <TouchableOpacity style={{ alignItems: 'center', justifyContent: 'center', marginBottom: -10, marginTop: 10 }} activeOpacity={0.7} onPress={()=>{setDeleteModal(!deleteModal)}} >
-                                <Text style={{ color: 'white', fontFamily: 'CenturyGothic', letterSpacing: 2, fontSize: 12 }}>DELETE</Text>
+                            <TouchableOpacity style={{ alignItems: 'center', justifyContent: 'center', marginBottom: -10, marginTop: 10 }} activeOpacity={0.7} onPress={() => { setDeleteModal(!deleteModal) }} >
+                                <Text style={{ color: 'white', fontFamily: 'CenturyGothic', letterSpacing: 2, fontSize: 10 }}>DELETE</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
