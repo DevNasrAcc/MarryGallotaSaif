@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, ImageBackground, Dimensions, Image } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, ImageBackground, Dimensions, Image, TextInput } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 
@@ -7,15 +7,16 @@ import { Images } from '../assets'
 
 
 const { width, height } = Dimensions.get('window')
-export default Main = () => {
+const Dashboard = ({ navigation }) => {
 
     const [picture, setPicture] = useState({});
     const [details, setDetails] = useState();
     const [description, setDescription] = useState();
+    const [deleteModal, setDeleteModal]  = useState(false);
 
 
     useEffect(() => {
-        console.warn('WelCome to Marry Gallota')
+        // console.warn('WelCome to Marry Gallota')
     }, [])
 
     const captureImage = async (type) => {
@@ -43,7 +44,7 @@ export default Main = () => {
             }
         });
     };
-    console.warn('Picture data', picture);
+    // console.warn('Picture data', picture);
 
     const requestExternalWritePermission = async () => {
         if (Platform.OS === 'android') {
@@ -85,7 +86,12 @@ export default Main = () => {
     const onSave = async (value) => {
         try {
             const imageData = JSON.stringify(value)
-            await AsyncStorage.setItem('@images', imageData)
+            await AsyncStorage.setItem('@imagedata', imageData)
+            console.warn('SAVED')
+            setTimeout(() => {
+                navigation.navigate('Lists')
+            }, 1000)
+
         } catch (error) {
             console.warn('Error', error.message)
         }
@@ -120,9 +126,9 @@ export default Main = () => {
                                 style={{ position: 'absolute', width: 30, height: 30, resizeMode: 'contain', top: 22, left: 25 }} /> */}
                         </TouchableOpacity>
                         <View style={boxeViewStyle}>
-                            {picture ? <Image source={{ uri: picture.uri }} style={{ height: height * 0.16, width: width * 0.6, borderRadius: 18, }} />
+                            {picture !== {} ? <Image source={{ uri: picture.uri }} style={{ height: height * 0.16, width: width * 0.6, borderRadius: 18, }} />
                                 : <Text style={{ fontFamily: 'CenturyGothic', letterSpacing: 5, fontSize: 18, color: 'white' }}>
-                                PICTURE
+                                    PICTURE
                             </Text>}
                         </View>
                         <View>
@@ -150,32 +156,47 @@ export default Main = () => {
                             <Text style={{ fontFamily: 'CenturyGothic', letterSpacing: 3, fontSize: 11, textAlign: 'center', color: 'white', marginVertical: 5, }}>
                                 Description
                             </Text>
-                            <View style={boxeViewStyle}>
-
+                            <View >
+                                <TextInput
+                                    multiline={true}
+                                    maxLength={1000}
+                                    type="text"
+                                    value={description}
+                                    // placeholder="type..."
+                                    // placeholderTextColor={'white'}
+                                    onChangeText={(e) => setDescription(e)}
+                                    color={'white'}
+                                    style={[boxeViewStyle, { color: 'white', textAlignVertical: 'top', padding: 5 }]}
+                                />
                             </View>
                         </View>
-                        <TouchableOpacity
-                            onPress={() => {
-                                onSave()
-                                console.warn('SAVED')
-                            }
-                            }
-                            style={buttonStyle} >
-                            <Image
-                                source={Images.icon2}
-                                style={{ width: 80, height: 80 }} />
-                            <Text
-                                style={{ position: 'absolute', textAlign: 'center', top: 30, left: 22, fontFamily: 'CenturyGothic', color: 'white', fontWeight: '700' }}
-                            >
-                                SAVE
+                        <View style={{ flexDirection: 'column', }} >
+                            <TouchableOpacity
+                                onPress={async () => {
+                                    await onSave(picture)
+                                }
+                                }
+                                style={buttonStyle} >
+                                <Image
+                                    source={Images.icon2}
+                                    style={{ width: 80, height: 80 }} />
+                                <Text
+                                    style={{ position: 'absolute', textAlign: 'center', top: 30, left: 22, fontFamily: 'CenturyGothic', color: 'white', fontWeight: '700' }}
+                                >
+                                    SAVE
                             </Text>
-                        </TouchableOpacity>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={{ alignItems: 'center', justifyContent: 'center', marginBottom: -10, marginTop: 10 }} activeOpacity={0.7} onPress={()=>{setDeleteModal(!deleteModal)}} >
+                                <Text style={{ color: 'white', fontFamily: 'CenturyGothic', letterSpacing: 2, fontSize: 12 }}>DELETE</Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
                 </ImageBackground>
             </SafeAreaView>
         </>
     )
 }
+export default Dashboard;
 
 const styles = StyleSheet.create({
     mainContainerStyle: {
@@ -184,7 +205,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between'
     },
     boxeViewStyle: {
-        backgroundColor: '#333333', height: height * 0.16, width: width * 0.6, borderRadius: 18, alignItems: 'center', justifyContent: 'center'
+        backgroundColor: '#333333', height: height * 0.16, width: width * 0.6, borderRadius: 10, alignItems: 'center', justifyContent: 'center',
     },
     buttonStyle: {
         alignItems: 'center', justifyContent: 'center',
