@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, ImageBackground, Dimensions, Image, TextInput,  } from 'react-native';
+import { View, Text, PermissionsAndroid, StyleSheet, SafeAreaView, TouchableOpacity, ImageBackground, Dimensions, Image, TextInput, } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import Modal from 'react-native-modal';
@@ -7,16 +7,22 @@ import { Images } from '../assets'
 
 
 const { width, height } = Dimensions.get('window')
-const Dashboard = ({ navigation }) => {
+const Dashboard = ({ navigation, route }) => {
 
     const [picture, setPicture] = useState({});
     const [details, setDetails] = useState();
-    const [description, setDescription] = useState();
+    const [description, setDescription] = useState('');
     const [deleteModal, setDeleteModal] = useState(false);
-
+    const [updateData, setUpdateData] = useState();
+    const [edit, setEdit] = useState();
 
     useEffect(() => {
-        // console.warn('WelCome to Marry Gallota')
+        route.params !== undefined && route.params.edit == true ? setEdit(true) : setEdit(false)
+        getData()
+        return () => {
+            setPicture({})
+            setDescription('')
+        }
     }, [])
 
     const captureImage = async (type) => {
@@ -26,25 +32,28 @@ const Dashboard = ({ navigation }) => {
                 path: 'images',
             },
         };
-        launchCamera(options, (response) => {
-            console.log('Response = ', response);
+        let isCameraPermitted = await requestCameraPermission();
+        let isStoragePermitted = await requestExternalWritePermission();
+        if (isCameraPermitted && isStoragePermitted) {
+            launchCamera(options, (response) => {
+                console.log('Response = ', response);
 
-            if (response.didCancel) {
-                console.log('User cancelled image picker');
-            } else if (response.error) {
-                console.log('ImagePicker Error: ', response.error);
-            } else if (response.customButton) {
-                console.log('User tapped custom button: ', response.customButton);
-                alert(response.customButton);
-            } else {
-                const source = { uri: response.uri };
-                console.warn(response)
-                console.log('response', JSON.stringify(response));
-                setPicture(response)
-            }
-        });
-    };
-    // console.warn('Picture data', picture);
+                if (response.didCancel) {
+                    console.log('User cancelled image picker');
+                } else if (response.error) {
+                    console.log('ImagePicker Error: ', response.error);
+                } else if (response.customButton) {
+                    console.log('User tapped custom button: ', response.customButton);
+                    alert(response.customButton);
+                } else {
+                    const source = { uri: response.uri };
+                    console.warn(response)
+                    console.log('response', JSON.stringify(response));
+                    setPicture(response)
+                }
+            });
+        };
+    }
 
     const requestExternalWritePermission = async () => {
         if (Platform.OS === 'android') {
@@ -83,12 +92,12 @@ const Dashboard = ({ navigation }) => {
             }
         } else return true;
     };
-    const onSave = async (value) => {
+    const onSave = async (a) => {
         try {
-            const imageData = JSON.stringify(value)
-            await AsyncStorage.setItem('@imagedata', imageData)
+            await AsyncStorage.setItem('@imagedata', JSON.stringify(a))
             console.warn('SAVED')
             setTimeout(() => {
+                getData()
                 navigation.navigate('Lists')
             }, 1000)
 
@@ -97,14 +106,54 @@ const Dashboard = ({ navigation }) => {
         }
     }
 
+    const updateImageItem = async (index) => {
+        try {
+
+            const picturedata = await AsyncStorage.getItem('@imagedata');
+            let pictureItems = JSON.parse(picturedata);
+            console.warn('pictureItems', pictureItems)
+            index.map(async (it, ind) => {
+                const updatedImageItems = pictureItems.filter(function (e, itemIndex) { return itemIndex !== ind });
+                console.warn('updatedImageItems', updatedImageItems)
+                await AsyncStorage.setItem('@imagedata', JSON.stringify(index));
+            })
+            setEdit(false)
+            setTimeout(() => {
+                getData()
+                navigation.navigate('Lists')
+            }, 1000)
+
+        } catch (error) {
+            console.log('error: ', error);
+        }
+    };
+
+
 
     const getData = async () => {
         try {
-            const jsonValue = await AsyncStorage.getItem('@storage_Key')
-            return jsonValue != null ? JSON.parse(jsonValue) : null;
+            const jsonValue = await AsyncStorage.getItem('@imagedata')
+            const data = jsonValue != null ? JSON.parse(jsonValue) : null;
+            setUpdateData(data)
         } catch (error) {
             console.warn('Error', error.message)
         }
+    }
+
+    const removeItem = async () => {
+        try {
+            const res = await AsyncStorage.removeItem('@imagedata')
+            setDeleteModal(!deleteModal)
+            console.warn('Delete Items', res)
+            setPicture({})
+            setDescription('')
+            navigation.navigate('Home')
+            getData()
+        } catch (e) {
+            console.warn('Error', e.message)
+        }
+
+        console.log('Done.')
     }
 
 
@@ -114,7 +163,7 @@ const Dashboard = ({ navigation }) => {
             <SafeAreaView style={{ flex: 0, backgroundColor: '#242423' }} />
             <SafeAreaView style={{ flex: 1, backgroundColor: '#242423' }}>
                 <ImageBackground source={Images.bg} style={{ width: width, height: height * 0.9 }} >
-                    <Modal transparent={true} isVisible={deleteModal} onBackdropPres={deleteModal}s >
+                    <Modal transparent={true} isVisible={deleteModal} onBackdropPres={deleteModal} s >
                         <View
                             style={{
                                 flex: 1,
@@ -134,15 +183,15 @@ const Dashboard = ({ navigation }) => {
                                     borderWidth: 10,
                                     borderColor: '#139245',
                                 }}>
-                                <View style={{width:180,marginTop:20}}>
-                                    <Text style={{ fontSize: 16, textAlign: 'center', color: 'white'}}>{'Are you sure you want to delete this image?'}</Text>
+                                <View style={{ width: 180, marginTop: 20 }}>
+                                    <Text style={{ fontSize: 16, textAlign: 'center', color: 'white' }}>{'Are you sure you want to delete this image?'}</Text>
                                 </View>
-                                <View style={{flexDirection: 'row' ,justifyContent: 'space-between', width:100}}>
-                                    <TouchableOpacity onPress={() => setDeleteModal(!deleteModal)}>
-                                        <Text style={{ fontFamily:'CenturyGothic', fontSize:18, color: 'white',letterSpacing:2}}>YES</Text>
+                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: 100 }}>
+                                    <TouchableOpacity onPress={() => removeItem()}>
+                                        <Text style={{ fontFamily: 'CenturyGothic', fontSize: 18, color: 'white', letterSpacing: 2 }}>YES</Text>
                                     </TouchableOpacity>
                                     <TouchableOpacity onPress={() => setDeleteModal(!deleteModal)}>
-                                        <Text style={{ fontFamily:'CenturyGothic', fontSize:18, color: 'white',letterSpacing:2}}>NO</Text>
+                                        <Text style={{ fontFamily: 'CenturyGothic', fontSize: 18, color: 'white', letterSpacing: 2 }}>NO</Text>
                                     </TouchableOpacity>
                                 </View>
                             </View>
@@ -154,35 +203,64 @@ const Dashboard = ({ navigation }) => {
                             style={buttonStyle} >
                             <Image
                                 source={Images.icon3}
-                                style={{ width: 80, height: 80 }} />
-                            {/* <Image
-                                source={Images.camera}
-                                style={{ position: 'absolute', width: 30, height: 30, resizeMode: 'contain', top: 22, left: 25 }} /> */}
+                                style={{ width: 80, height: 80 }}
+                            />
                         </TouchableOpacity>
                         <View style={boxeViewStyle}>
-                            {picture !== {} ? <Image source={{ uri: picture.uri }} style={{ height: height * 0.16, width: width * 0.6, borderRadius: 18, }} />
-                                : <Text style={{ fontFamily: 'CenturyGothic', letterSpacing: 5, fontSize: 18, color: 'white' }}>
+                            {picture.uri ?
+                                <Image
+                                    source={
+                                        picture.uri != undefined
+                                            ? { uri: picture.uri }
+
+                                            : '--'
+                                    }
+
+                                    style={{ height: height * 0.16, width: width * 0.6, borderRadius: 10, }}
+                                />
+                                :
+                                <Text style={{ fontFamily: 'CenturyGothic', letterSpacing: 5, fontSize: 18, color: 'white' }}>
                                     PICTURE
                             </Text>}
                         </View>
                         <View>
                             <View style={entriesViewStyle}>
                                 <Text style={entriesStyle}>{'MARKDOWN'}</Text>
-                                <View style={{ backgroundColor: '#333333', width: width * 0.28, height: height * 0.018, borderRadius: 4 }} />
+                                <View style={{ backgroundColor: '#333333', width: width * 0.28, height: height * 0.018, borderRadius: 4 }} >
+                                    <Text style={{ color: 'white', fontSize: 10, marginLeft: 5, }}>{
+                                        picture.fileName != undefined
+                                            ? picture.fileName
+
+                                            : '--'
+                                    }</Text>
+                                </View>
                             </View>
                             <View style={entriesViewStyle}>
                                 <Text style={entriesStyle}>{'BRAND'}</Text>
-                                <View style={{ backgroundColor: '#333333', width: width * 0.36, height: height * 0.018, borderRadius: 4 }} />
+                                <View style={{ backgroundColor: '#333333', width: width * 0.36, height: height * 0.018, borderRadius: 4, }} >
+                                    <Text style={{ color: 'white', fontSize: 10, marginLeft: 5, }}>{
+                                        picture.type
+                                            ? picture.type.split('/').join(' ')
+                                            : '--'}</Text>
+                                </View>
 
                             </View>
                             <View style={entriesViewStyle}>
                                 <Text style={entriesStyle}>{'COLOR'}</Text>
-                                <View style={{ backgroundColor: '#333333', width: width * 0.36, height: height * 0.018, borderRadius: 4 }} />
+                                <View style={{ backgroundColor: '#333333', width: width * 0.36, height: height * 0.018, borderRadius: 4 }} >
+                                    <Text style={{ color: 'white', fontSize: 10, marginLeft: 5, }}>{'--'}</Text>
+                                </View>
 
                             </View>
                             <View style={entriesViewStyle}>
                                 <Text style={entriesStyle}>{'SIZE'}</Text>
-                                <View style={{ backgroundColor: '#333333', width: width * 0.4, height: height * 0.018, borderRadius: 4 }} />
+                                <View style={{ backgroundColor: '#333333', width: width * 0.4, height: height * 0.018, borderRadius: 4, alignItems: 'flex-start', justifyContent: 'center' }}>
+                                    <Text style={{ color: 'white', fontSize: 10, marginLeft: 5, }}>{
+                                        picture.fileSize != undefined
+                                            ? picture.fileSize
+                                            : '--'
+                                    }</Text>
+                                </View>
 
                             </View>
                         </View>
@@ -194,10 +272,9 @@ const Dashboard = ({ navigation }) => {
                                 <TextInput
                                     multiline={true}
                                     maxLength={1000}
+                                    editable={true}
                                     type="text"
-                                    value={description}
-                                    // placeholder="type..."
-                                    // placeholderTextColor={'white'}
+                                    value={description ? description : ''}
                                     onChangeText={(e) => setDescription(e)}
                                     color={'white'}
                                     style={[boxeViewStyle, { color: 'white', textAlignVertical: 'top', padding: 5 }]}
@@ -207,22 +284,33 @@ const Dashboard = ({ navigation }) => {
                         <View style={{ flexDirection: 'column', }} >
                             <TouchableOpacity
                                 onPress={async () => {
-                                    await onSave(picture)
+                                    let data = { ...picture, des: description }
+                                    let arr = [];
+                                    arr.push(data)
+                                  edit ? updateImageItem(arr) : onSave(arr)
                                 }
                                 }
                                 style={buttonStyle} >
                                 <Image
                                     source={Images.icon2}
                                     style={{ width: 80, height: 80 }} />
-                                <Text
-                                    style={{ position: 'absolute', textAlign: 'center', top: 30, left: 22, fontFamily: 'CenturyGothic', color: 'white', fontWeight: '700' }}
-                                >
-                                    SAVE
-                            </Text>
+                                {edit
+                                    ? <Text
+                                        style={{ position: 'absolute', textAlign: 'center', fontSize: 12, top: 32, left: 17, fontFamily: 'CenturyGothic', color: 'white', fontWeight: '700' }}
+                                    >
+                                        {'UPDATE'}
+                                    </Text>
+                                    :
+                                    <Text
+                                        style={{ position: 'absolute', textAlign: 'center', top: 30, left: 22, fontFamily: 'CenturyGothic', color: 'white', fontWeight: '700' }}
+                                    >
+                                        {'SAVE'}
+                                    </Text>}
                             </TouchableOpacity>
-                            <TouchableOpacity style={{ alignItems: 'center', justifyContent: 'center', marginBottom: -10, marginTop: 10 }} activeOpacity={0.7} onPress={() => { setDeleteModal(!deleteModal) }} >
+                            {<TouchableOpacity style={{ alignItems: 'center', justifyContent: 'center', marginBottom: -10, marginTop: 10 }}
+                                onPress={() => setDeleteModal(!deleteModal)} >
                                 <Text style={{ color: 'white', fontFamily: 'CenturyGothic', letterSpacing: 2, fontSize: 10 }}>DELETE</Text>
-                            </TouchableOpacity>
+                            </TouchableOpacity>}
                         </View>
                     </View>
                 </ImageBackground>

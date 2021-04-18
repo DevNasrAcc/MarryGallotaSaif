@@ -7,73 +7,87 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Images } from '../assets'
 
 const { width, height } = Dimensions.get('window');
-const ImageLists = ({navigation}) => {
+const ImageLists = ({ navigation ,route}) => {
+    const [data, setData] = useState()
+    const [edit, setEdit] = useState(true)
 
-    const renderList = ({ item }) => {
+    useEffect(() => {
+        getData()
+        return() => {
+            setEdit(false)
+        }
+    }, [])
+    const getData = async () => {
+        try {
+            const jsonValue = await AsyncStorage.getItem('@imagedata')
+            const parseData = jsonValue != null ? JSON.parse(jsonValue) : null;
+            setData(parseData)
+        } catch (error) {
+            console.warn('Error', error.message)
+        }
+    }
+
+
+
+    const renderList = (item) => {
+        console.warn('data flate list', item)
+        console.warn('uri flate list', item.item.uri)
         return (
             <View style={listContainer}>
-                <TouchableOpacity style={EditButtonStyle}>
+                <TouchableOpacity style={EditButtonStyle} onPress={() => {
+                navigation.navigate('Home', {
+                   edit: edit,
+                });
+
+                }} >
                     <Text style={EditButtonTextStyle}>EDIT</Text>
                 </TouchableOpacity>
                 <View style={picDetailsStyle}>
-                    <View style={picViewStyle}>
-                        <Text style={picViewTextStyle}>{item.name}</Text>
+                    <View >
+                        {item.item.uri == undefined ? <View style={picViewStyle}>
+                            <Text style={picViewTextStyle}>{'PICTURE'}</Text>
+                        </View>
+                            : <Image source={{ uri: item.item.uri }} style={{ width: 75, height: 75, borderRadius: 10, }} />
+                        }
                     </View>
                     <View style={detailViewStyle} >
                         <View style={item1Style}>
                             <Text style={item1TextStyle}>{'MARKDOWN'}</Text>
-                            <View style={item1ViewStyle}></View>
+                            <View style={item1ViewStyle}>
+                                <Text style={{ color: 'white', fontSize: 8, marginLeft: 5, }}>{item.item.fileName ? item.item.fileName : '--'}</Text>
+                            </View>
                         </View>
                         <View style={item2Style}>
                             <Text style={item2TextStyle}>{'BRAND'}</Text>
-                            <View style={item2ViewStyle}></View>
+                            <View style={item2ViewStyle}>
+                                <Text style={{ color: 'white', fontSize: 8, marginLeft: 5, }}>
+                                    {item.item.type ? item.item.type.split('/').join(' ') : '--'}
+                                </Text>
+                            </View>
                         </View>
                         <View style={item3Style}>
                             <Text style={item3TextStyle}>{'COLOR'}</Text>
-                            <View style={item3ViewStyle}></View>
+                            <View style={item3ViewStyle}>
+                                <Text style={{ color: 'white', fontSize: 8, marginLeft: 5, }}>{'--'}</Text>
+                            </View>
                         </View>
                         <View style={item4Style}>
                             <Text style={item4TextStyle}>{'SIZE'}</Text>
-                            <View style={item4ViewStyle}></View>
+                            <View style={item4ViewStyle}>
+                                <Text style={{ color: 'white', fontSize: 8, marginLeft: 5, }}>
+                                    {item.item.fileSize ? item.item.fileSize : '--'}
+                                </Text>
+                            </View>
                         </View>
                     </View>
                     <View style={descContainerStyle}>
                         <Text style={desTextStyle}>DESCRIPTION</Text>
-                        <View style={descViewStyle}></View>
+                        <View style={descViewStyle}><Text style={{ color: 'white', fontSize: 10, marginLeft: 5, textAlign: 'left' }}>{item.item.des}</Text></View>
                     </View>
                 </View>
             </View>
         )
     }
-    const obj = [
-        {
-            name: 'Picture 01'
-        },
-        {
-            name: 'Picture 02'
-        },
-        {
-            name: 'Picture 03'
-        },
-        {
-            name: 'Picture 04'
-        },
-        {
-            name: 'Picture 05'
-        },
-        {
-            name: 'Picture 06'
-        },
-        {
-            name: 'Picture 07'
-        },
-        {
-            name: 'Picture 08'
-        },
-        {
-            name: 'Picture 09'
-        },
-    ]
     const {
         mainContainerStyle,
         listContainer,
@@ -104,7 +118,6 @@ const ImageLists = ({navigation}) => {
         <>
             <SafeAreaView style={{ flex: 0, backgroundColor: '#242423' }} />
             <SafeAreaView style={{ flex: 1, backgroundColor: '#242423' }}>
-                {/* <ImageBackground source={Images.bg} style={{ width: width, height: height * 0.9 }} > */}
                 <View style={mainContainerStyle}>
                     <TouchableOpacity
                         onPress={() => navigation.navigate('Home')}
@@ -116,15 +129,14 @@ const ImageLists = ({navigation}) => {
                     </TouchableOpacity>
                     <View style={{ flex: 1 }}>
                         <FlatList
-                        showsVerticalScrollIndicator={false}
+                            showsVerticalScrollIndicator={false}
                             keyExtractor={(it, ind) => ind}
-                            data={obj}
+                            data={data}
                             renderItem={(i) => renderList(i)}
 
                         />
                     </View>
                 </View>
-                {/* </ImageBackground> */}
             </SafeAreaView>
         </>
     )
@@ -135,7 +147,6 @@ const styles = StyleSheet.create({
     mainContainerStyle: {
         flex: 1,
         alignItems: 'center',
-        // justifyContent: 'space-between'
     },
     listContainer: {
         flexDirection: 'row', marginTop: 40, alignItems: 'center', justifyContent: 'space-between',
