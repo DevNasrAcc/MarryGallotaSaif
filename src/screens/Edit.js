@@ -7,7 +7,8 @@ import { Images } from '../assets'
 
 
 const { width, height } = Dimensions.get('window')
-const Dashboard = ({ navigation, route }) => {
+const Edit = ({ navigation, route }) => {
+    // console.warn(route.params)
 
     const [picture, setPicture] = useState({});
     const [details, setDetails] = useState();
@@ -19,6 +20,8 @@ const Dashboard = ({ navigation, route }) => {
     useEffect(() => {
         // removeItem()
         route.params !== undefined && route.params.edit == true ? setEdit(true) : setEdit(false)
+        route.params !== undefined && setPicture(route.params.item)
+
         getData()
         return () => {
             setPicture({})
@@ -158,56 +161,60 @@ const Dashboard = ({ navigation, route }) => {
     }
 
 
-    const { mainContainerStyle, boxeViewStyle, buttonStyle, entriesViewStyle, entriesStyle } = styles;
+    const { mainContainerStyle, box1ViewStyle, boxViewStyle, buttonStyle, entriesViewStyle, entriesStyle } = styles;
     return (
         <>
             <SafeAreaView style={{ flex: 0, backgroundColor: '#242423' }} />
             <SafeAreaView style={{ flex: 1, backgroundColor: '#242423' }}>
-                <ImageBackground source={Images.bg} style={{ width: width, height: height * 0.9 }} >
-                    <Modal transparent={true} isVisible={deleteModal} onBackdropPres={deleteModal} s >
+                {/* <ImageBackground source={Images.bg} style={{ width: width, height: height * 0.9 }} > */}
+                <Modal transparent={true} isVisible={deleteModal} onBackdropPres={deleteModal} s >
+                    <View
+                        style={{
+                            flex: 1,
+                            justifyContent: 'center',
+                            backgroundColor: 'transparent',
+                            alignItems: 'center',
+                        }}>
                         <View
                             style={{
-                                flex: 1,
-                                justifyContent: 'center',
-                                backgroundColor: '#000000aa',
+                                height: 260,
+                                width: 260,
+                                borderRadius: 200,
+                                paddingVertical: 10,
+                                justifyContent: 'space-around',
                                 alignItems: 'center',
+                                backgroundColor: '#1BB81F',
+                                borderWidth: 10,
+                                borderColor: '#139245',
                             }}>
-                            <View
-                                style={{
-                                    height: 260,
-                                    width: 260,
-                                    borderRadius: 200,
-                                    paddingVertical: 10,
-                                    justifyContent: 'space-around',
-                                    alignItems: 'center',
-                                    backgroundColor: '#1BB81F',
-                                    borderWidth: 10,
-                                    borderColor: '#139245',
-                                }}>
-                                <View style={{ width: 180, marginTop: 20 }}>
-                                    <Text style={{ fontSize: 16, textAlign: 'center', color: 'white' }}>{'Are you sure you want to delete this image?'}</Text>
-                                </View>
-                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: 100 }}>
-                                    <TouchableOpacity onPress={() => removeItem()}>
-                                        <Text style={{ fontFamily: 'CenturyGothic', fontSize: 18, color: 'white', letterSpacing: 2 }}>YES</Text>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity onPress={() => setDeleteModal(!deleteModal)}>
-                                        <Text style={{ fontFamily: 'CenturyGothic', fontSize: 18, color: 'white', letterSpacing: 2 }}>NO</Text>
-                                    </TouchableOpacity>
-                                </View>
+                            <View style={{ width: 180, marginTop: 20 }}>
+                                <Text style={{ fontSize: 22, textAlign: 'center', color: 'white', letterSpacing: 2, fontWeight: '300' }}>
+                                    {'ARE YOU SURE YOU WANT TO DELETE ?'}
+                                </Text>
+                            </View>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: 130 }}>
+                                <TouchableOpacity onPress={() => removeItem()}>
+                                    <Text style={{ fontFamily: 'CenturyGothic', fontSize: 22, color: 'white', letterSpacing: 2 }}>YES</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={() => setDeleteModal(!deleteModal)}>
+                                    <Text style={{ fontFamily: 'CenturyGothic', fontSize: 22, color: 'white', letterSpacing: 2 }}>NO</Text>
+                                </TouchableOpacity>
                             </View>
                         </View>
-                    </Modal>
-                    <View style={mainContainerStyle} >
-                        <TouchableOpacity
+                    </View>
+                </Modal>
+                <View style={mainContainerStyle} >
+                    {/* <TouchableOpacity
                             onPress={() => captureImage('photo')}
                             style={buttonStyle} >
                             <Image
                                 source={Images.icon3}
                                 style={{ width: 80, height: 80 }}
                             />
-                        </TouchableOpacity>
-                        <View style={boxeViewStyle}>
+                        </TouchableOpacity> */}
+                    <View>
+                        <View style={{ borderBottomWidth: 1.5, borderBottomColor: '#333333', width: width * 0.65, alignSelf: "center", padding: 10 }} />
+                        <View style={box1ViewStyle}>
                             {picture.uri ?
                                 <Image
                                     source={
@@ -216,7 +223,6 @@ const Dashboard = ({ navigation, route }) => {
 
                                             : '--'
                                     }
-
                                     style={{ height: height * 0.16, width: width * 0.6, borderRadius: 10, }}
                                 />
                                 :
@@ -224,7 +230,13 @@ const Dashboard = ({ navigation, route }) => {
                                     PICTURE
                             </Text>}
                         </View>
-                        <View>
+                        <View style={{ borderTopWidth: 1.5, borderTopColor: '#333333', width: width * 0.65, alignSelf: "center", padding: 10 }} />
+                    </View>
+                    <View style={{height:40, width: 2, backgroundColor: '#333333', position:'absolute', top:203, bottom:0 }} />
+
+                    <View>
+                        <View style={{ borderBottomWidth: 1.5, borderBottomColor: '#333333', width: width * 0.4, alignSelf: "center", padding: 10 }} />
+                        <View style={{ alignSelf: "center", marginVertical: 5, }}>
                             <View style={entriesViewStyle}>
                                 <Text style={entriesStyle}>{'MARKDOWN'}</Text>
                                 <View style={{ backgroundColor: '#333333', width: width * 0.28, height: height * 0.018, borderRadius: 4 }} >
@@ -244,14 +256,12 @@ const Dashboard = ({ navigation, route }) => {
                                             ? picture.type.split('/').join(' ')
                                             : '--'}</Text>
                                 </View>
-
                             </View>
                             <View style={entriesViewStyle}>
                                 <Text style={entriesStyle}>{'COLOR'}</Text>
                                 <View style={{ backgroundColor: '#333333', width: width * 0.36, height: height * 0.018, borderRadius: 4 }} >
                                     <Text style={{ color: 'white', fontSize: 10, marginLeft: 5, }}>{'--'}</Text>
                                 </View>
-
                             </View>
                             <View style={entriesViewStyle}>
                                 <Text style={entriesStyle}>{'SIZE'}</Text>
@@ -262,13 +272,18 @@ const Dashboard = ({ navigation, route }) => {
                                             : '--'
                                     }</Text>
                                 </View>
-
                             </View>
                         </View>
-                        <View>
+                        <View style={{ borderTopWidth: 1.5, borderTopColor: '#333333', width: width * 0.4, alignSelf: "center", padding: 10 }} />
+                    </View>
+                    <View style={{height:40, width: 2, backgroundColor: '#333333', position:'absolute', top:358, bottom:0 }} />
+
+                    <View>
+                        <View style={{ borderBottomWidth: 1.5, borderBottomColor: '#333333', width: width * 0.25, alignSelf: "center", padding: 10 }} />
+                        <View style={{ alignSelf: "center", marginVertical: 10 }}>
                             <Text style={{ fontFamily: 'CenturyGothic', letterSpacing: 3, fontSize: 11, textAlign: 'center', color: 'white', marginVertical: 5, }}>
                                 Description
-                            </Text>
+                                </Text>
                             <View >
                                 <TextInput
                                     multiline={true}
@@ -278,17 +293,22 @@ const Dashboard = ({ navigation, route }) => {
                                     value={description ? description : ''}
                                     onChangeText={(e) => setDescription(e)}
                                     color={'white'}
-                                    style={[boxeViewStyle, { color: 'white', textAlignVertical: 'top', padding: 5 }]}
+                                    style={[boxViewStyle, { color: 'white', textAlignVertical: 'top', padding: 5 }]}
                                 />
                             </View>
                         </View>
-                        <View style={{ flexDirection: 'column', }} >
+                        <View style={{ borderTopWidth: 1.5, borderTopColor: '#333333', width: width * 0.5, alignSelf: "center", padding: 10 }} />
+                    </View>
+                    <View style={{height:40, width: 2, backgroundColor: '#333333', position:'absolute', bottom:122 }} />
+                    <View>
+                        <View style={{ borderBottomWidth: 1.5, borderBottomColor: '#333333', width: width * 0.25, alignSelf: "center", padding: 10, }} />
+                        <View style={{ flexDirection: 'column', marginVertical: 10, alignSelf: "center" }} >
                             <TouchableOpacity
                                 onPress={async () => {
                                     let data = { ...picture, des: description }
                                     let arr = [];
                                     arr.push(data)
-                                  edit ? updateImageItem(arr) : onSave(arr)
+                                    edit ? updateImageItem(arr) : onSave(arr)
                                 }
                                 }
                                 style={buttonStyle} >
@@ -308,49 +328,60 @@ const Dashboard = ({ navigation, route }) => {
                                         {'SAVE'}
                                     </Text>}
                             </TouchableOpacity>
-                            {/* {<TouchableOpacity style={{ alignItems: 'center', justifyContent: 'center', marginBottom: -10, marginTop: 10 }}
+                            {<TouchableOpacity
+                                style={{ alignItems: 'center', justifyContent: 'center', marginBottom: -10, marginTop: 15 }}
                                 onPress={() => setDeleteModal(!deleteModal)} >
-                                <Text style={{ color: 'white', fontFamily: 'CenturyGothic', letterSpacing: 2, fontSize: 10 }}>DELETE</Text>
-                            </TouchableOpacity>} */}
+                                <Text style={{ color: 'white', fontFamily: 'CenturyGothic', letterSpacing: 3, fontSize: 13 }}>DELETE</Text>
+                            </TouchableOpacity>}
                         </View>
                     </View>
-                </ImageBackground>
+                </View>
+                {/* </ImageBackground> */}
             </SafeAreaView>
         </>
     )
 }
-export default Dashboard;
+export default Edit;
 
 const styles = StyleSheet.create({
     mainContainerStyle: {
-        flex: 1,
+        // flex: 1,
         alignItems: 'center',
-        justifyContent: 'space-between'
+        // justifyContent: 'space-between'
     },
-    boxeViewStyle: {
-        backgroundColor: '#333333', 
-        height: height * 0.16, 
-        width: width * 0.6, 
-        borderRadius: 10, 
-        alignItems: 'center', 
+    box1ViewStyle: {
+        marginVertical: 10,
+        backgroundColor: '#333333',
+        height: height * 0.19,
+        width: width * 0.8,
+        borderRadius: 15,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    boxViewStyle: {
+        backgroundColor: '#333333',
+        height: height * 0.16,
+        width: width * 0.6,
+        borderRadius: 15,
+        alignItems: 'center',
         justifyContent: 'center',
     },
     buttonStyle: {
-        alignItems: 'center', 
+        alignItems: 'center',
         justifyContent: 'center',
     },
     entriesViewStyle: {
-        flexDirection: 'row', 
-        justifyContent: 'space-between', 
-        alignItems: 'center', 
-        width: width * 0.5, 
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        width: width * 0.5,
         marginVertical: 5,
     },
     entriesStyle: {
-        alignItems: 'flex-start', 
-        justifyContent: 'flex-start', 
-        fontFamily: 'CenturyGothic', 
-        color: 'white', 
+        alignItems: 'flex-start',
+        justifyContent: 'flex-start',
+        fontFamily: 'CenturyGothic',
+        color: 'white',
         fontSize: 11,
     }
 })

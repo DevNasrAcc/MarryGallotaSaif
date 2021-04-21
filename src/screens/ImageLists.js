@@ -7,13 +7,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Images } from '../assets'
 
 const { width, height } = Dimensions.get('window');
-const ImageLists = ({ navigation ,route}) => {
+const ImageLists = ({ navigation, route }) => {
     const [data, setData] = useState()
     const [edit, setEdit] = useState(true)
 
     useEffect(() => {
         getData()
-        return() => {
+        return () => {
             setEdit(false)
         }
     }, [])
@@ -35,9 +35,9 @@ const ImageLists = ({ navigation ,route}) => {
         return (
             <View style={listContainer}>
                 <TouchableOpacity style={EditButtonStyle} onPress={() => {
-                navigation.navigate('Home', {
-                   edit: edit,
-                });
+                    navigation.navigate('Edit', {
+                        item:item
+                    });
 
                 }} >
                     <Text style={EditButtonTextStyle}>EDIT</Text>
@@ -149,76 +149,142 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     listContainer: {
-        flexDirection: 'row', marginTop: 40, alignItems: 'center', justifyContent: 'space-between',
+        flexDirection: 'row',
+        marginTop: 40,
+        alignItems: 'center',
+        justifyContent: 'space-between',
     },
     EditButtonStyle: {
-        marginStart: 10, alignItems: 'center', justifyContent: 'center', width: 55, height: 55, borderRadius: 10, backgroundColor: '#1BB81F'
+        marginStart: 10,
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: 55, height: 55,
+        borderRadius: 10,
+        backgroundColor: '#1BB81F'
     },
     EditButtonTextStyle: {
-        fontFamily: 'CenturyGothic', color: 'white', letterSpacing: 2,
+        fontFamily: 'CenturyGothic',
+        color: 'white',
+        letterSpacing: 2,
     },
     boxeViewStyle: {
-        backgroundColor: '#333333', height: height * 0.16, width: width * 0.6, borderRadius: 18, alignItems: 'center', justifyContent: 'center'
+        backgroundColor: '#333333',
+        height: height * 0.16,
+        width: width * 0.6,
+        borderRadius: 18,
+        alignItems: 'center',
+        justifyContent: 'center'
     },
     buttonStyle: {
-        alignItems: 'center', justifyContent: 'center',
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     picDetailsStyle: {
-        flexDirection: 'row', justifyContent: 'space-evenly', width: width * 0.82
+        flexDirection: 'row',
+        justifyContent: 'space-evenly',
+        width: width * 0.82
     },
     picViewStyle: {
-        backgroundColor: '#333333', width: 75, height: 75, borderRadius: 10, alignItems: 'center', justifyContent: 'center'
+        backgroundColor: '#333333',
+        width: 75,
+        height: 75,
+        borderRadius: 10,
+        alignItems: 'center',
+        justifyContent: 'center'
     },
     picViewTextStyle: {
-        color: 'white', fontFamily: 'CenturyGothic', letterSpacing: 1, fontSize: 11
+        color: 'white',
+        fontFamily: 'CenturyGothic',
+        letterSpacing: 1,
+        fontSize: 11
     },
     detailViewStyle: {
-        flex: 0, justifyContent: 'space-between'
+        flex: 0,
+        justifyContent: 'space-between'
     },
     item1Style: {
-        flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center'
     },
     item1TextStyle: {
-        fontFamily: 'CenturyGothic', color: 'white', fontSize: 8, letterSpacing: 1.5
+        fontFamily: 'CenturyGothic',
+        color: 'white',
+        fontSize: 8,
+        letterSpacing: 1.5
     },
     item1ViewStyle: {
-        backgroundColor: '#333333', width: 50, height: 10, borderRadius: 3
+        backgroundColor: '#333333',
+        width: 50,
+        height: 10,
+        borderRadius: 3
     },
     item2Style: {
-        flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center'
     },
     item2TextStyle: {
-        fontFamily: 'CenturyGothic', color: 'white', fontSize: 8, letterSpacing: 1.5
+        fontFamily: 'CenturyGothic',
+        color: 'white',
+        fontSize: 8,
+        letterSpacing: 1.5
     },
     item2ViewStyle: {
-        backgroundColor: '#333333', width: 80, height: 10, borderRadius: 3
+        backgroundColor: '#333333',
+        width: 80,
+        height: 10,
+        borderRadius: 3
     },
     item3Style: {
-        flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center'
     },
     item3TextStyle: {
-        fontFamily: 'CenturyGothic', color: 'white', fontSize: 8, letterSpacing: 1.5
+        fontFamily: 'CenturyGothic',
+        color: 'white',
+        fontSize: 8,
+        letterSpacing: 1.5
     },
     item3ViewStyle: {
-        backgroundColor: '#333333', width: 80, height: 10, borderRadius: 3
+        backgroundColor: '#333333',
+        width: 80,
+        height: 10,
+        borderRadius: 3
     },
     item4Style: {
-        flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
     },
     item4TextStyle: {
-        fontFamily: 'CenturyGothic', color: 'white', fontSize: 8, letterSpacing: 1.5
+        fontFamily: 'CenturyGothic',
+        color: 'white',
+        fontSize: 8,
+        letterSpacing: 1.5
     },
     item4ViewStyle: {
-        backgroundColor: '#333333', width: 90, height: 10, borderRadius: 3
+        backgroundColor: '#333333',
+        width: 90,
+        height: 10,
+        borderRadius: 3
     },
     descContainerStyle: {
-        flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between'
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'space-between'
     },
     desTextStyle: {
-        fontFamily: 'CenturyGothic', color: 'white', fontSize: 9, letterSpacing: 1.5
+        fontFamily: 'CenturyGothic',
+        color: 'white',
+        fontSize: 9,
+        letterSpacing: 1.5
     },
     descViewStyle: {
-        backgroundColor: '#333333', width: 75, height: 55, borderRadius: 5
+        backgroundColor: '#333333',
+        width: 75, height: 55,
+        borderRadius: 5
     }
 
 })
