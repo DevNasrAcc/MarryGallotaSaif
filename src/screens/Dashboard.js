@@ -19,7 +19,7 @@ const Dashboard = ({ navigation, route }) => {
     const [edit, setEdit] = useState();
 
     const addImageData = (state) => dispatch(addimagedata(state))
-    const image_data = useSelector((state)=> state.DataReducer);
+    const image_data = useSelector((state) => state.DataReducer);
     console.warn(image_data)
     useEffect(() => {
         // removeItem()
