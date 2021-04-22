@@ -36,7 +36,7 @@ const ImageLists = ({ navigation, route }) => {
             <View style={listContainer}>
                 <TouchableOpacity style={EditButtonStyle} onPress={() => {
                     navigation.navigate('Edit', {
-                        item:item
+                        item: item
                     });
 
                 }} >

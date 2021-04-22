@@ -232,7 +232,7 @@ const Edit = ({ navigation, route }) => {
                         </View>
                         <View style={{ borderTopWidth: 1.5, borderTopColor: '#333333', width: width * 0.65, alignSelf: "center", padding: 10 }} />
                     </View>
-                    <View style={{height:40, width: 2, backgroundColor: '#333333', position:'absolute', top:203, bottom:0 }} />
+                    <View style={{ height: 40, width: 2, backgroundColor: '#333333', position: 'absolute', top: 203, bottom: 0 }} />
 
                     <View>
                         <View style={{ borderBottomWidth: 1.5, borderBottomColor: '#333333', width: width * 0.4, alignSelf: "center", padding: 10 }} />
@@ -276,7 +276,7 @@ const Edit = ({ navigation, route }) => {
                         </View>
                         <View style={{ borderTopWidth: 1.5, borderTopColor: '#333333', width: width * 0.4, alignSelf: "center", padding: 10 }} />
                     </View>
-                    <View style={{height:40, width: 2, backgroundColor: '#333333', position:'absolute', top:358, bottom:0 }} />
+                    <View style={{ height: 40, width: 2, backgroundColor: '#333333', position: 'absolute', top: 358, bottom: 0 }} />
 
                     <View>
                         <View style={{ borderBottomWidth: 1.5, borderBottomColor: '#333333', width: width * 0.25, alignSelf: "center", padding: 10 }} />
@@ -299,7 +299,7 @@ const Edit = ({ navigation, route }) => {
                         </View>
                         <View style={{ borderTopWidth: 1.5, borderTopColor: '#333333', width: width * 0.5, alignSelf: "center", padding: 10 }} />
                     </View>
-                    <View style={{height:40, width: 2, backgroundColor: '#333333', position:'absolute', bottom:122 }} />
+                    <View style={{ height: 40, width: 2, backgroundColor: '#333333', position: 'absolute', bottom: 128 }} />
                     <View>
                         <View style={{ borderBottomWidth: 1.5, borderBottomColor: '#333333', width: width * 0.25, alignSelf: "center", padding: 10, }} />
                         <View style={{ flexDirection: 'column', marginVertical: 10, alignSelf: "center" }} >
@@ -329,9 +329,9 @@ const Edit = ({ navigation, route }) => {
                                     </Text>}
                             </TouchableOpacity>
                             {<TouchableOpacity
-                                style={{ alignItems: 'center', justifyContent: 'center', marginBottom: -10, marginTop: 15 }}
+                                style={{ alignItems: 'center', justifyContent: 'center', marginTop: 15 }}
                                 onPress={() => setDeleteModal(!deleteModal)} >
-                                <Text style={{ color: 'white', fontFamily: 'CenturyGothic', letterSpacing: 3, fontSize: 13 }}>DELETE</Text>
+                                <Text style={{ color: 'white', fontFamily: 'CenturyGothic', letterSpacing: 3, fontSize: 9 }}>DELETE</Text>
                             </TouchableOpacity>}
                         </View>
                     </View>

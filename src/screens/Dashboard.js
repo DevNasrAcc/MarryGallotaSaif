@@ -4,11 +4,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import Modal from 'react-native-modal';
 import { Images } from '../assets'
-
+import { useDispatch, useSelector } from 'react-redux';
+import { addimagedata } from '../redux/Data_Reducer'
 
 const { width, height } = Dimensions.get('window')
 const Dashboard = ({ navigation, route }) => {
 
+    const dispatch = useDispatch();
     const [picture, setPicture] = useState({});
     const [details, setDetails] = useState();
     const [description, setDescription] = useState('');
@@ -16,6 +18,9 @@ const Dashboard = ({ navigation, route }) => {
     const [updateData, setUpdateData] = useState();
     const [edit, setEdit] = useState();
 
+    const addImageData = (state) => dispatch(addimagedata(state))
+    const image_data = useSelector((state)=> state.DataReducer);
+    console.warn(image_data)
     useEffect(() => {
         // removeItem()
         route.params !== undefined && route.params.edit == true ? setEdit(true) : setEdit(false)
@@ -107,6 +112,17 @@ const Dashboard = ({ navigation, route }) => {
         }
     }
 
+    const getData = async () => {
+        try {
+            const jsonValue = await AsyncStorage.getItem('@imagedata')
+            const data = jsonValue != null ? JSON.parse(jsonValue) : null;
+            addImageData(data);
+            setUpdateData(data)
+        } catch (error) {
+            console.warn('Error', error.message)
+        }
+    };
+
     const updateImageItem = async (index) => {
         try {
 
@@ -131,15 +147,7 @@ const Dashboard = ({ navigation, route }) => {
 
 
 
-    const getData = async () => {
-        try {
-            const jsonValue = await AsyncStorage.getItem('@imagedata')
-            const data = jsonValue != null ? JSON.parse(jsonValue) : null;
-            setUpdateData(data)
-        } catch (error) {
-            console.warn('Error', error.message)
-        }
-    }
+
 
     const removeItem = async () => {
         try {
@@ -288,7 +296,7 @@ const Dashboard = ({ navigation, route }) => {
                                     let data = { ...picture, des: description }
                                     let arr = [];
                                     arr.push(data)
-                                  edit ? updateImageItem(arr) : onSave(arr)
+                                    edit ? updateImageItem(arr) : onSave(arr)
                                 }
                                 }
                                 style={buttonStyle} >
@@ -328,29 +336,29 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between'
     },
     boxeViewStyle: {
-        backgroundColor: '#333333', 
-        height: height * 0.16, 
-        width: width * 0.6, 
-        borderRadius: 10, 
-        alignItems: 'center', 
+        backgroundColor: '#333333',
+        height: height * 0.16,
+        width: width * 0.6,
+        borderRadius: 10,
+        alignItems: 'center',
         justifyContent: 'center',
     },
     buttonStyle: {
-        alignItems: 'center', 
+        alignItems: 'center',
         justifyContent: 'center',
     },
     entriesViewStyle: {
-        flexDirection: 'row', 
-        justifyContent: 'space-between', 
-        alignItems: 'center', 
-        width: width * 0.5, 
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        width: width * 0.5,
         marginVertical: 5,
     },
     entriesStyle: {
-        alignItems: 'flex-start', 
-        justifyContent: 'flex-start', 
-        fontFamily: 'CenturyGothic', 
-        color: 'white', 
+        alignItems: 'flex-start',
+        justifyContent: 'flex-start',
+        fontFamily: 'CenturyGothic',
+        color: 'white',
         fontSize: 11,
     }
 })

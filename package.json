@@ -21,7 +21,9 @@
     "react-native-modal": "^11.10.0",
     "react-native-reanimated": "^2.1.0",
     "react-native-safe-area-context": "^3.2.0",
-    "react-native-screens": "^3.1.1"
+    "react-native-screens": "^3.1.1",
+    "react-redux": "^7.2.3",
+    "redux": "^4.0.5"
   },
   "devDependencies": {
     "@babel/core": "^7.13.15",
