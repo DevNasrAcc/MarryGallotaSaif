@@ -4,11 +4,28 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import Modal from 'react-native-modal';
 import { Images } from '../assets'
+import { useDispatch, useSelector } from 'react-redux';
+import { addimagedata, updateimagedata } from '../redux/Data_Reducer'
 
 
 const { width, height } = Dimensions.get('window')
 const Edit = ({ navigation, route }) => {
-    // console.warn(route.params)
+    // console.warn(route.params.getDetailedData)
+    const dispatch = useDispatch();
+    const addImageData = (state) => {
+        dispatch(addimagedata(state))
+    }
+
+    const image_data = useSelector((state) => state.DataReducer);
+    let edit_data;
+    if (image_data !== undefined || image_data !== null) {
+        image_data.map((item, index) => {
+            return edit_data = item
+        })
+    }
+    else{
+        return getData()
+    }
 
     const [picture, setPicture] = useState({});
     const [details, setDetails] = useState();
@@ -26,6 +43,7 @@ const Edit = ({ navigation, route }) => {
         return () => {
             setPicture({})
             setDescription('')
+            // clearImageData()
         }
     }, [])
 
@@ -124,8 +142,9 @@ const Edit = ({ navigation, route }) => {
             setEdit(false)
             setTimeout(() => {
                 getData()
+                route.params.getDetailedData()
                 navigation.navigate('Lists')
-            }, 1000)
+            }, 700)
 
         } catch (error) {
             console.log('error: ', error);
@@ -138,7 +157,10 @@ const Edit = ({ navigation, route }) => {
         try {
             const jsonValue = await AsyncStorage.getItem('@imagedata')
             const data = jsonValue != null ? JSON.parse(jsonValue) : null;
+            console.warn('getting upadated data', data)
             setUpdateData(data)
+            // setDescription(data.des)
+            addImageData(data)
         } catch (error) {
             console.warn('Error', error.message)
         }
@@ -151,6 +173,7 @@ const Edit = ({ navigation, route }) => {
             console.warn('Delete Items', res)
             setPicture({})
             setDescription('')
+            // clearImageData()
             navigation.navigate('Home')
             getData()
         } catch (e) {
@@ -166,7 +189,6 @@ const Edit = ({ navigation, route }) => {
         <>
             <SafeAreaView style={{ flex: 0, backgroundColor: '#242423' }} />
             <SafeAreaView style={{ flex: 1, backgroundColor: '#242423' }}>
-                {/* <ImageBackground source={Images.bg} style={{ width: width, height: height * 0.9 }} > */}
                 <Modal transparent={true} isVisible={deleteModal} onBackdropPres={deleteModal} s >
                     <View
                         style={{
@@ -193,7 +215,10 @@ const Edit = ({ navigation, route }) => {
                                 </Text>
                             </View>
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: 130 }}>
-                                <TouchableOpacity onPress={() => removeItem()}>
+                                <TouchableOpacity onPress={() => {
+                                    removeItem()
+                                    // navigation.navigate('Home')
+                                }}>
                                     <Text style={{ fontFamily: 'CenturyGothic', fontSize: 22, color: 'white', letterSpacing: 2 }}>YES</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity onPress={() => setDeleteModal(!deleteModal)}>
@@ -204,35 +229,36 @@ const Edit = ({ navigation, route }) => {
                     </View>
                 </Modal>
                 <View style={mainContainerStyle} >
-                    {/* <TouchableOpacity
-                            onPress={() => captureImage('photo')}
-                            style={buttonStyle} >
-                            <Image
-                                source={Images.icon3}
-                                style={{ width: 80, height: 80 }}
-                            />
-                        </TouchableOpacity> */}
+
                     <View>
                         <View style={{ borderBottomWidth: 1.5, borderBottomColor: '#333333', width: width * 0.65, alignSelf: "center", padding: 10 }} />
                         <View style={box1ViewStyle}>
-                            {picture.uri ?
-                                <Image
-                                    source={
-                                        picture.uri != undefined
-                                            ? { uri: picture.uri }
+                            <TouchableOpacity onPress={() => captureImage()}>
+                                {edit_data.uri ?
+                                    <Image
+                                        source={
+                                            picture.uri != undefined
+                                                ? { uri: picture.uri }
+                                                : edit_data
+                                                    ? { uri: edit_data.uri }
+                                                    : '--'
+                                        }
+                                        style={{
+                                            height: height * 0.19,
+                                            width: width * 0.8, borderRadius: 15,
+                                        }}
+                                    />
+                                    :
+                                    <Text style={{ fontFamily: 'CenturyGothic', letterSpacing: 5, fontSize: 18, color: 'white' }}>
+                                        PICTURE
+                                </Text>
 
-                                            : '--'
-                                    }
-                                    style={{ height: height * 0.16, width: width * 0.6, borderRadius: 10, }}
-                                />
-                                :
-                                <Text style={{ fontFamily: 'CenturyGothic', letterSpacing: 5, fontSize: 18, color: 'white' }}>
-                                    PICTURE
-                            </Text>}
+                                }
+                            </TouchableOpacity>
                         </View>
                         <View style={{ borderTopWidth: 1.5, borderTopColor: '#333333', width: width * 0.65, alignSelf: "center", padding: 10 }} />
                     </View>
-                    <View style={{ height: 40, width: 2, backgroundColor: '#333333', position: 'absolute', top: 203, bottom: 0 }} />
+                    <View style={{ height: 40, width: 2, backgroundColor: '#333333', position: 'absolute', top: height * 0.256, bottom: 0 }} />
 
                     <View>
                         <View style={{ borderBottomWidth: 1.5, borderBottomColor: '#333333', width: width * 0.4, alignSelf: "center", padding: 10 }} />
@@ -243,8 +269,9 @@ const Edit = ({ navigation, route }) => {
                                     <Text style={{ color: 'white', fontSize: 10, marginLeft: 5, }}>{
                                         picture.fileName != undefined
                                             ? picture.fileName
-
-                                            : '--'
+                                            : edit_data.fileName
+                                                ? edit_data.fileName
+                                                : '--'
                                     }</Text>
                                 </View>
                             </View>
@@ -254,7 +281,10 @@ const Edit = ({ navigation, route }) => {
                                     <Text style={{ color: 'white', fontSize: 10, marginLeft: 5, }}>{
                                         picture.type
                                             ? picture.type.split('/').join(' ')
-                                            : '--'}</Text>
+                                            : edit_data.type
+                                                ? edit_data.type.split('/').join(' ')
+                                                : '--'}
+                                    </Text>
                                 </View>
                             </View>
                             <View style={entriesViewStyle}>
@@ -269,14 +299,16 @@ const Edit = ({ navigation, route }) => {
                                     <Text style={{ color: 'white', fontSize: 10, marginLeft: 5, }}>{
                                         picture.fileSize != undefined
                                             ? picture.fileSize
-                                            : '--'
+                                            : edit_data.fileSize
+                                                ? edit_data.fileSize
+                                                : '--'
                                     }</Text>
                                 </View>
                             </View>
                         </View>
                         <View style={{ borderTopWidth: 1.5, borderTopColor: '#333333', width: width * 0.4, alignSelf: "center", padding: 10 }} />
                     </View>
-                    <View style={{ height: 40, width: 2, backgroundColor: '#333333', position: 'absolute', top: 358, bottom: 0 }} />
+                    <View style={{ height: 40, width: 2, backgroundColor: '#333333', position: 'absolute', top: height * 0.475, bottom: 0 }} />
 
                     <View>
                         <View style={{ borderBottomWidth: 1.5, borderBottomColor: '#333333', width: width * 0.25, alignSelf: "center", padding: 10 }} />
@@ -290,7 +322,7 @@ const Edit = ({ navigation, route }) => {
                                     maxLength={1000}
                                     editable={true}
                                     type="text"
-                                    value={description ? description : ''}
+                                    value={description !== '' ? description : edit_data.des ? edit_data.des : ''}
                                     onChangeText={(e) => setDescription(e)}
                                     color={'white'}
                                     style={[boxViewStyle, { color: 'white', textAlignVertical: 'top', padding: 5 }]}
@@ -299,44 +331,38 @@ const Edit = ({ navigation, route }) => {
                         </View>
                         <View style={{ borderTopWidth: 1.5, borderTopColor: '#333333', width: width * 0.5, alignSelf: "center", padding: 10 }} />
                     </View>
-                    <View style={{ height: 40, width: 2, backgroundColor: '#333333', position: 'absolute', bottom: 128 }} />
+                    <View style={{ height: 40, width: 2, backgroundColor: '#333333', position: 'absolute', bottom: height * 0.13 }} />
                     <View>
                         <View style={{ borderBottomWidth: 1.5, borderBottomColor: '#333333', width: width * 0.25, alignSelf: "center", padding: 10, }} />
-                        <View style={{ flexDirection: 'column', marginVertical: 10, alignSelf: "center" }} >
+                        <View style={{ flexDirection: 'column', marginVertical: 5, alignSelf: "center" }} >
                             <TouchableOpacity
                                 onPress={async () => {
                                     let data = { ...picture, des: description }
                                     let arr = [];
                                     arr.push(data)
-                                    edit ? updateImageItem(arr) : onSave(arr)
+                                    console.warn('Before Updating', arr)
+                                    updateImageItem(arr)
                                 }
                                 }
                                 style={buttonStyle} >
                                 <Image
                                     source={Images.icon2}
-                                    style={{ width: 80, height: 80 }} />
-                                {edit
-                                    ? <Text
-                                        style={{ position: 'absolute', textAlign: 'center', fontSize: 12, top: 32, left: 17, fontFamily: 'CenturyGothic', color: 'white', fontWeight: '700' }}
-                                    >
-                                        {'UPDATE'}
-                                    </Text>
-                                    :
-                                    <Text
-                                        style={{ position: 'absolute', textAlign: 'center', top: 30, left: 22, fontFamily: 'CenturyGothic', color: 'white', fontWeight: '700' }}
-                                    >
-                                        {'SAVE'}
-                                    </Text>}
+                                    style={{ width: 60, height: 60 }} />
+
+                                <Text
+                                    style={{ position: 'absolute', textAlign: 'center', top: 22, left: 12, fontFamily: 'CenturyGothic', color: 'white', fontWeight: '700' }}
+                                >
+                                    {'SAVE'}
+                                </Text>
                             </TouchableOpacity>
                             {<TouchableOpacity
-                                style={{ alignItems: 'center', justifyContent: 'center', marginTop: 15 }}
+                                style={{ alignItems: 'center', justifyContent: 'center', marginTop: 5 }}
                                 onPress={() => setDeleteModal(!deleteModal)} >
                                 <Text style={{ color: 'white', fontFamily: 'CenturyGothic', letterSpacing: 3, fontSize: 9 }}>DELETE</Text>
                             </TouchableOpacity>}
                         </View>
                     </View>
                 </View>
-                {/* </ImageBackground> */}
             </SafeAreaView>
         </>
     )

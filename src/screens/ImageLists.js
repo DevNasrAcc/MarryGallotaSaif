@@ -11,17 +11,21 @@ const ImageLists = ({ navigation, route }) => {
     const [data, setData] = useState()
     const [edit, setEdit] = useState(true)
 
+    console.warn('Captured Data==>', data)
+
     useEffect(() => {
-        getData()
+        getDetailedData()
         return () => {
             setEdit(false)
+            
+
         }
     }, [])
-    const getData = async () => {
+    const getDetailedData = async () => {
         try {
             const jsonValue = await AsyncStorage.getItem('@imagedata')
             const parseData = jsonValue != null ? JSON.parse(jsonValue) : null;
-            setData(parseData)
+            await setData(parseData)
         } catch (error) {
             console.warn('Error', error.message)
         }
@@ -36,7 +40,8 @@ const ImageLists = ({ navigation, route }) => {
             <View style={listContainer}>
                 <TouchableOpacity style={EditButtonStyle} onPress={() => {
                     navigation.navigate('Edit', {
-                        item: item
+                        item: item,
+                        getDetailedData:getDetailedData
                     });
 
                 }} >
@@ -124,7 +129,7 @@ const ImageLists = ({ navigation, route }) => {
                         style={buttonStyle}>
                         <Image
                             source={Images.icon4}
-                            style={{ width: 90, height: 90 }}
+                            style={{ width: 70, height: 70 }}
                         />
                     </TouchableOpacity>
                     <View style={{ flex: 1 }}>

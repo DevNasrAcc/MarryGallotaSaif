@@ -9,24 +9,24 @@ export const CLEAR_IMAGE_DETAILS = 'CLEAR_IMAGE_DETAILS';
 export function addimagedata(data) {
   console.log('USER DATA AFTER UPADTE==>', data)
   return {
-    type: ADD_USER_DATA,
+    type: ADD_IMAGE_DATA,
     data,
   };
 }
 export function updateimagedata(data) {
   return {
-    type: UPDATE_DATA,
+    type: UPDATE_IMAGE_DATA,
     data,
   };
 }
 export function clearimagedata() {
   return {
-    type: CLEAR_USER_DATA,
+    type: CLEAR_IMAGE_DATA,
   };
 }
 export function clearimagedetails() {
   return {
-    type: CLEAR_USER_DETAILS,
+    type: CLEAR_IMAGE_DETAILS,
   };
 }
 

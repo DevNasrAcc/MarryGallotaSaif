@@ -5,4 +5,5 @@ export const Images  = {
     icon4: require('./images/Group4.png'),
     bg: require('./images/BG.png'),
     camera: require('./images/camera.png'),
+    edit: require('./icons/edit.png'),
 }

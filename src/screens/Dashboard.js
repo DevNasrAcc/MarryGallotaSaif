@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, PermissionsAndroid, StyleSheet, SafeAreaView, TouchableOpacity, ImageBackground, Dimensions, Image, TextInput, } from 'react-native';
+import { View, Text, PermissionsAndroid, StyleSheet, SafeAreaView, TouchableOpacity, ImageBackground, Dimensions, Image, TextInput, Alert, } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import Modal from 'react-native-modal';
@@ -19,8 +19,8 @@ const Dashboard = ({ navigation, route }) => {
     const [edit, setEdit] = useState();
 
     const addImageData = (state) => dispatch(addimagedata(state))
-    const image_data = useSelector((state) => state.DataReducer);
-    console.warn(image_data)
+    // const image_data = useSelector((state) => state.DataReducer);
+    // console.warn('DATA REDUCER', image_data)
     useEffect(() => {
         // removeItem()
         route.params !== undefined && route.params.edit == true ? setEdit(true) : setEdit(false)
@@ -100,12 +100,19 @@ const Dashboard = ({ navigation, route }) => {
     };
     const onSave = async (a) => {
         try {
-            await AsyncStorage.setItem('@imagedata', JSON.stringify(a))
-            console.warn('SAVED')
-            setTimeout(() => {
-                getData()
-                navigation.navigate('Lists')
-            }, 1000)
+            if (description != '') {
+                await AsyncStorage.setItem('@imagedata', JSON.stringify(a))
+                console.warn('SAVED')
+                setTimeout(() => {
+                    getData()
+                    navigation.navigate('Lists')
+                }, 1000)
+                setPicture({})
+                setDescription('')
+            }
+            else {
+                Alert.alert('Please enter description')
+            }
 
         } catch (error) {
             console.warn('Error', error.message)
@@ -125,10 +132,9 @@ const Dashboard = ({ navigation, route }) => {
 
     const updateImageItem = async (index) => {
         try {
-
             const picturedata = await AsyncStorage.getItem('@imagedata');
             let pictureItems = JSON.parse(picturedata);
-            console.warn('pictureItems', pictureItems)
+            // console.warn('pictureItems', pictureItems)
             index.map(async (it, ind) => {
                 const updatedImageItems = pictureItems.filter(function (e, itemIndex) { return itemIndex !== ind });
                 console.warn('updatedImageItems', updatedImageItems)
@@ -145,181 +151,146 @@ const Dashboard = ({ navigation, route }) => {
         }
     };
 
-
-
-
-
-    const removeItem = async () => {
-        try {
-            const res = await AsyncStorage.removeItem('@imagedata')
-            setDeleteModal(!deleteModal)
-            console.warn('Delete Items', res)
-            setPicture({})
-            setDescription('')
-            navigation.navigate('Home')
-            getData()
-        } catch (e) {
-            console.warn('Error', e.message)
-        }
-
-        console.log('Done.')
-    }
-
-
     const { mainContainerStyle, boxeViewStyle, buttonStyle, entriesViewStyle, entriesStyle } = styles;
     return (
         <>
             <SafeAreaView style={{ flex: 0, backgroundColor: '#242423' }} />
             <SafeAreaView style={{ flex: 1, backgroundColor: '#242423' }}>
                 <ImageBackground source={Images.bg} style={{ width: width, height: height * 0.9 }} >
-                    <Modal transparent={true} isVisible={deleteModal} onBackdropPres={deleteModal} s >
-                        <View
-                            style={{
-                                flex: 1,
-                                justifyContent: 'center',
-                                backgroundColor: '#000000aa',
-                                alignItems: 'center',
-                            }}>
-                            <View
-                                style={{
-                                    height: 260,
-                                    width: 260,
-                                    borderRadius: 200,
-                                    paddingVertical: 10,
-                                    justifyContent: 'space-around',
-                                    alignItems: 'center',
-                                    backgroundColor: '#1BB81F',
-                                    borderWidth: 10,
-                                    borderColor: '#139245',
-                                }}>
-                                <View style={{ width: 180, marginTop: 20 }}>
-                                    <Text style={{ fontSize: 16, textAlign: 'center', color: 'white' }}>{'Are you sure you want to delete this image?'}</Text>
-                                </View>
-                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: 100 }}>
-                                    <TouchableOpacity onPress={() => removeItem()}>
-                                        <Text style={{ fontFamily: 'CenturyGothic', fontSize: 18, color: 'white', letterSpacing: 2 }}>YES</Text>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity onPress={() => setDeleteModal(!deleteModal)}>
-                                        <Text style={{ fontFamily: 'CenturyGothic', fontSize: 18, color: 'white', letterSpacing: 2 }}>NO</Text>
-                                    </TouchableOpacity>
-                                </View>
-                            </View>
-                        </View>
-                    </Modal>
                     <View style={mainContainerStyle} >
-                        <TouchableOpacity
-                            onPress={() => captureImage('photo')}
-                            style={buttonStyle} >
-                            <Image
-                                source={Images.icon3}
-                                style={{ width: 80, height: 80 }}
-                            />
-                        </TouchableOpacity>
-                        <View style={boxeViewStyle}>
-                            {picture.uri ?
-                                <Image
-                                    source={
-                                        picture.uri != undefined
-                                            ? { uri: picture.uri }
-
-                                            : '--'
-                                    }
-
-                                    style={{ height: height * 0.16, width: width * 0.6, borderRadius: 10, }}
-                                />
-                                :
-                                <Text style={{ fontFamily: 'CenturyGothic', letterSpacing: 5, fontSize: 18, color: 'white' }}>
-                                    PICTURE
-                            </Text>}
-                        </View>
                         <View>
-                            <View style={entriesViewStyle}>
-                                <Text style={entriesStyle}>{'MARKDOWN'}</Text>
-                                <View style={{ backgroundColor: '#333333', width: width * 0.28, height: height * 0.018, borderRadius: 4 }} >
-                                    <Text style={{ color: 'white', fontSize: 10, marginLeft: 5, }}>{
-                                        picture.fileName != undefined
-                                            ? picture.fileName
-
-                                            : '--'
-                                    }</Text>
-                                </View>
-                            </View>
-                            <View style={entriesViewStyle}>
-                                <Text style={entriesStyle}>{'BRAND'}</Text>
-                                <View style={{ backgroundColor: '#333333', width: width * 0.36, height: height * 0.018, borderRadius: 4, }} >
-                                    <Text style={{ color: 'white', fontSize: 10, marginLeft: 5, }}>{
-                                        picture.type
-                                            ? picture.type.split('/').join(' ')
-                                            : '--'}</Text>
-                                </View>
-
-                            </View>
-                            <View style={entriesViewStyle}>
-                                <Text style={entriesStyle}>{'COLOR'}</Text>
-                                <View style={{ backgroundColor: '#333333', width: width * 0.36, height: height * 0.018, borderRadius: 4 }} >
-                                    <Text style={{ color: 'white', fontSize: 10, marginLeft: 5, }}>{'--'}</Text>
-                                </View>
-
-                            </View>
-                            <View style={entriesViewStyle}>
-                                <Text style={entriesStyle}>{'SIZE'}</Text>
-                                <View style={{ backgroundColor: '#333333', width: width * 0.4, height: height * 0.018, borderRadius: 4, alignItems: 'flex-start', justifyContent: 'center' }}>
-                                    <Text style={{ color: 'white', fontSize: 10, marginLeft: 5, }}>{
-                                        picture.fileSize != undefined
-                                            ? picture.fileSize
-                                            : '--'
-                                    }</Text>
-                                </View>
-
-                            </View>
-                        </View>
-                        <View>
-                            <Text style={{ fontFamily: 'CenturyGothic', letterSpacing: 3, fontSize: 11, textAlign: 'center', color: 'white', marginVertical: 5, }}>
-                                Description
-                            </Text>
-                            <View >
-                                <TextInput
-                                    multiline={true}
-                                    maxLength={1000}
-                                    editable={true}
-                                    type="text"
-                                    value={description ? description : ''}
-                                    onChangeText={(e) => setDescription(e)}
-                                    color={'white'}
-                                    style={[boxeViewStyle, { color: 'white', textAlignVertical: 'top', padding: 5 }]}
-                                />
-                            </View>
-                        </View>
-                        <View style={{ flexDirection: 'column', }} >
                             <TouchableOpacity
-                                onPress={async () => {
-                                    let data = { ...picture, des: description }
-                                    let arr = [];
-                                    arr.push(data)
-                                    edit ? updateImageItem(arr) : onSave(arr)
-                                }
-                                }
+                                onPress={() => captureImage('photo')}
                                 style={buttonStyle} >
                                 <Image
-                                    source={Images.icon2}
-                                    style={{ width: 80, height: 80 }} />
-                                {edit
-                                    ? <Text
-                                        style={{ position: 'absolute', textAlign: 'center', fontSize: 12, top: 32, left: 17, fontFamily: 'CenturyGothic', color: 'white', fontWeight: '700' }}
-                                    >
-                                        {'UPDATE'}
-                                    </Text>
+                                    source={Images.icon3}
+                                    style={{ width: 70, height: 70 }}
+                                />
+                            </TouchableOpacity>
+                            <View style={{ width: width * 0.15, alignSelf: "center", borderTopColor: '#333', borderTopWidth: 2, marginTop: 5 }} />
+                        </View>
+                        <View style={{ height: 20, width: 2, backgroundColor: '#333333', position: 'absolute', top: height * 0.115, bottom: 0 }} />
+
+                        <View style={{}}>
+                            <View style={{ width: width * 0.5, alignSelf: "center", borderBottomColor: '#333', borderBottomWidth: 2, marginBottom: 5 }} />
+                            <View style={boxeViewStyle}>
+                                {picture.uri ?
+                                    <Image
+                                        source={
+                                            picture.uri != undefined
+                                                ? { uri: picture.uri }
+                                                : '--'
+                                        }
+                                        style={{ height: height * 0.16, width: width * 0.6, borderRadius: 10, }}
+                                    />
                                     :
+                                    <Text style={{ fontFamily: 'CenturyGothic', letterSpacing: 5, fontSize: 18, color: 'white' }}>
+                                        PICTURE
+                            </Text>}
+                            </View>
+                            <View style={{ width: width * 0.5, alignSelf: "center", borderTopColor: '#333', borderTopWidth: 2, marginTop: 5 }} />
+                        </View>
+                        <View style={{ height: 20, width: 2, backgroundColor: '#333333', position: 'absolute', top: height * 0.32, bottom: 0 }} />
+
+                        <View>
+                            <View style={{ width: width * 0.4, alignSelf: "center", borderBottomColor: '#333', borderBottomWidth: 2, marginBottom: 5 }} />
+                            <View>
+                                <View style={entriesViewStyle}>
+                                    <Text style={entriesStyle}>{'MARKDOWN'}</Text>
+                                    <View style={{ backgroundColor: '#333333', width: width * 0.28, height: height * 0.018, borderRadius: 4 }} >
+                                        <Text style={{ color: 'white', fontSize: 10, marginLeft: 5, }}>{
+                                            picture.fileName != undefined
+                                                ? picture.fileName
+                                                : '--'
+                                        }</Text>
+                                    </View>
+                                </View>
+                                <View style={entriesViewStyle}>
+                                    <Text style={entriesStyle}>{'BRAND'}</Text>
+                                    <View style={{ backgroundColor: '#333333', width: width * 0.36, height: height * 0.018, borderRadius: 4, }} >
+                                        <Text style={{ color: 'white', fontSize: 10, marginLeft: 5, }}>{
+                                            picture.type
+                                                ? picture.type.split('/').join(' ')
+                                                : '--'}</Text>
+                                    </View>
+                                </View>
+                                <View style={entriesViewStyle}>
+                                    <Text style={entriesStyle}>{'COLOR'}</Text>
+                                    <View style={{ backgroundColor: '#333333', width: width * 0.36, height: height * 0.018, borderRadius: 4 }} >
+                                        <Text style={{ color: 'white', fontSize: 10, marginLeft: 5, }}>{'--'}</Text>
+                                    </View>
+
+                                </View>
+                                <View style={entriesViewStyle}>
+                                    <Text style={entriesStyle}>{'SIZE'}</Text>
+                                    <View style={{ backgroundColor: '#333333', width: width * 0.4, height: height * 0.018, borderRadius: 4, alignItems: 'flex-start', justifyContent: 'center' }}>
+                                        <Text style={{ color: 'white', fontSize: 10, marginLeft: 5, }}>{
+                                            picture.fileSize != undefined
+                                                ? picture.fileSize
+                                                : '--'
+                                        }</Text>
+                                    </View>
+                                </View>
+                            </View>
+                            <View style={{ width: width * 0.4, alignSelf: "center", borderTopColor: '#333', borderTopWidth: 2, marginTop: 5 }} />
+                        </View>
+                        <View style={{ height: 20, width: 2, backgroundColor: '#333333', position: 'absolute', top: height * 0.51, bottom: 0 }} />
+
+                        <View>
+                            <View style={{ width: width * 0.25, alignSelf: "center", borderBottomColor: '#333', borderBottomWidth: 2, marginBottom: 5 }} />
+
+                            <View>
+                                <Text style={{
+                                    fontFamily: 'CenturyGothic',
+                                    letterSpacing: 3,
+                                    fontSize: 11,
+                                    textAlign: 'center',
+                                    color: 'white',
+                                    marginVertical: 5,
+                                }}
+                                >
+                                    Description
+                            </Text>
+                                <View >
+                                    <TextInput
+                                        multiline={true}
+                                        maxLength={1000}
+                                        editable={true}
+                                        type="text"
+                                        value={description ? description : ''}
+                                        onChangeText={(e) => setDescription(e)}
+                                        color={'white'}
+                                        style={[boxeViewStyle, { color: 'white', textAlignVertical: 'top', padding: 5 }]}
+                                    />
+                                </View>
+                            </View>
+                            <View style={{ width: width * 0.45, alignSelf: "center", borderTopColor: '#333', borderTopWidth: 2, marginTop: 5 }} />
+                        </View>
+                        <View style={{ height: 20, width: 2, backgroundColor: '#333333', position: 'absolute', bottom: height * 0.115 }} />
+
+                        <View>
+                            <View style={{ width: width * 0.15, alignSelf: "center", borderBottomColor: '#333', borderBottomWidth: 2, marginBottom: 5 }} />
+                            <View style={{ flexDirection: 'column', }} >
+                                <TouchableOpacity
+                                    onPress={async () => {
+                                        let data = { ...picture, des: description }
+                                        let arr = [];
+                                        arr.push(data)
+                                        edit ? updateImageItem(arr) : onSave(arr)
+                                    }
+                                    }
+                                    style={buttonStyle} >
+                                    <Image
+                                        source={Images.icon2}
+                                        style={{ width: 70, height: 70 }} />
+
                                     <Text
-                                        style={{ position: 'absolute', textAlign: 'center', top: 30, left: 22, fontFamily: 'CenturyGothic', color: 'white', fontWeight: '700' }}
+                                        style={{ position: 'absolute', fontSize: 11, textAlign: 'center', top: 28, left: 22, fontFamily: 'CenturyGothic', color: 'white', fontWeight: '700' }}
                                     >
                                         {'SAVE'}
-                                    </Text>}
-                            </TouchableOpacity>
-                            {/* {<TouchableOpacity style={{ alignItems: 'center', justifyContent: 'center', marginBottom: -10, marginTop: 10 }}
-                                onPress={() => setDeleteModal(!deleteModal)} >
-                                <Text style={{ color: 'white', fontFamily: 'CenturyGothic', letterSpacing: 2, fontSize: 10 }}>DELETE</Text>
-                            </TouchableOpacity>} */}
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
                         </View>
                     </View>
                 </ImageBackground>
