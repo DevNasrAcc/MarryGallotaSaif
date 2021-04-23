@@ -98,15 +98,15 @@ const Dashboard = ({ navigation, route }) => {
             }
         } else return true;
     };
-    const onSave = async (a) => {
+    const onSave = async (state) => {
         try {
+            let  oldData = JSON.parse(await AsyncStorage.getItem('@imagedata'));
+                 oldData = [...oldData,state];
             if (description != '') {
-                await AsyncStorage.setItem('@imagedata', JSON.stringify(a))
+                await AsyncStorage.setItem('@imagedata', JSON.stringify(oldData))
                 console.warn('SAVED')
-                setTimeout(() => {
-                    getData()
-                    navigation.navigate('Lists')
-                }, 1000)
+                await getData()
+                await navigation.navigate('Lists')
                 setPicture({})
                 setDescription('')
             }
@@ -169,7 +169,7 @@ const Dashboard = ({ navigation, route }) => {
                             </TouchableOpacity>
                             <View style={{ width: width * 0.15, alignSelf: "center", borderTopColor: '#333', borderTopWidth: 2, marginTop: 5 }} />
                         </View>
-                        <View style={{ height: 20, width: 2, backgroundColor: '#333333', position: 'absolute', top: height * 0.115, bottom: 0 }} />
+                        <View style={{ height: 43, width: 2, backgroundColor: '#333333', position: 'absolute', top: height * 0.09, bottom: 0 }} />
 
                         <View style={{}}>
                             <View style={{ width: width * 0.5, alignSelf: "center", borderBottomColor: '#333', borderBottomWidth: 2, marginBottom: 5 }} />
@@ -190,7 +190,7 @@ const Dashboard = ({ navigation, route }) => {
                             </View>
                             <View style={{ width: width * 0.5, alignSelf: "center", borderTopColor: '#333', borderTopWidth: 2, marginTop: 5 }} />
                         </View>
-                        <View style={{ height: 20, width: 2, backgroundColor: '#333333', position: 'absolute', top: height * 0.32, bottom: 0 }} />
+                        <View style={{ height: 45, width: 2, backgroundColor: '#333333', position: 'absolute', top: height * 0.315, bottom: 0 }} />
 
                         <View>
                             <View style={{ width: width * 0.4, alignSelf: "center", borderBottomColor: '#333', borderBottomWidth: 2, marginBottom: 5 }} />
@@ -234,7 +234,7 @@ const Dashboard = ({ navigation, route }) => {
                             </View>
                             <View style={{ width: width * 0.4, alignSelf: "center", borderTopColor: '#333', borderTopWidth: 2, marginTop: 5 }} />
                         </View>
-                        <View style={{ height: 20, width: 2, backgroundColor: '#333333', position: 'absolute', top: height * 0.51, bottom: 0 }} />
+                        <View style={{ height: 45, width: 2, backgroundColor: '#333333', position: 'absolute', top: height * 0.501, bottom: 0 }} />
 
                         <View>
                             <View style={{ width: width * 0.25, alignSelf: "center", borderBottomColor: '#333', borderBottomWidth: 2, marginBottom: 5 }} />
@@ -266,17 +266,14 @@ const Dashboard = ({ navigation, route }) => {
                             </View>
                             <View style={{ width: width * 0.45, alignSelf: "center", borderTopColor: '#333', borderTopWidth: 2, marginTop: 5 }} />
                         </View>
-                        <View style={{ height: 20, width: 2, backgroundColor: '#333333', position: 'absolute', bottom: height * 0.115 }} />
+                        <View style={{ height: 45, width: 2, backgroundColor: '#333333', position: 'absolute', bottom: height * 0.09 }} />
 
                         <View>
                             <View style={{ width: width * 0.15, alignSelf: "center", borderBottomColor: '#333', borderBottomWidth: 2, marginBottom: 5 }} />
                             <View style={{ flexDirection: 'column', }} >
                                 <TouchableOpacity
                                     onPress={async () => {
-                                        let data = { ...picture, des: description }
-                                        let arr = [];
-                                        arr.push(data)
-                                        edit ? updateImageItem(arr) : onSave(arr)
+                                        onSave({ ...picture, des: description })
                                     }
                                     }
                                     style={buttonStyle} >
@@ -285,7 +282,7 @@ const Dashboard = ({ navigation, route }) => {
                                         style={{ width: 70, height: 70 }} />
 
                                     <Text
-                                        style={{ position: 'absolute', fontSize: 11, textAlign: 'center', top: 28, left: 22, fontFamily: 'CenturyGothic', color: 'white', fontWeight: '700' }}
+                                        style={{ position: 'absolute', fontSize: 11, textAlign: 'center', top: 28, left: 21, fontFamily: 'CenturyGothic', color: 'white', fontWeight: '700' }}
                                     >
                                         {'SAVE'}
                                     </Text>
@@ -304,7 +301,8 @@ const styles = StyleSheet.create({
     mainContainerStyle: {
         flex: 1,
         alignItems: 'center',
-        justifyContent: 'space-between'
+        justifyContent: 'space-between',
+        // top: 30
     },
     boxeViewStyle: {
         backgroundColor: '#333333',

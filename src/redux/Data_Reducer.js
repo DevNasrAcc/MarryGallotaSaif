@@ -32,25 +32,21 @@ export function clearimagedetails() {
 
 //global State
 // Intial State
-let empty = {};
-let user = {};
+let empty = [];
+let images = [];
 AsyncStorage.getItem('@imagedata').then((result) => {
   if (result) {
-    Object.assign(user, JSON.parse(result));
-    console.warn('user', result);
+    images = JSON.parse(result);
   }
 });
-export default function DataReducer(state = user, action) {
+export default function DataReducer(state = images, action) {
   console.log('UPDATED REDUX',action.data)
   switch (action.type) {
     case ADD_IMAGE_DATA:
       return action.data;
     case UPDATE_IMAGE_DATA:
       console.log('UPDATE_IMAGE_DATA REDUX',action.data)
-      return {
-        ...state,
-        [action.data.name]: action.data.value,
-      };
+      return action.data;
     case CLEAR_IMAGE_DETAILS:
       return empty;
     default:

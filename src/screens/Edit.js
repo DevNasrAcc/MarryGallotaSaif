@@ -350,7 +350,7 @@ const Edit = ({ navigation, route }) => {
                                     style={{ width: 60, height: 60 }} />
 
                                 <Text
-                                    style={{ position: 'absolute', textAlign: 'center', top: 22, left: 12, fontFamily: 'CenturyGothic', color: 'white', fontWeight: '700' }}
+                                    style={{ position: 'absolute', textAlign: 'center', top: 22, left: 15,fontSize:12, fontFamily: 'CenturyGothic', color: 'white', fontWeight: '700' }}
                                 >
                                     {'SAVE'}
                                 </Text>
