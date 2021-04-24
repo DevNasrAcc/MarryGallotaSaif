@@ -21,9 +21,11 @@ import { Images } from '../assets'
 import { useDispatch, useSelector } from 'react-redux';
 import { addimagedata } from '../redux/Data_Reducer'
 import firestore from '@react-native-firebase/firestore'
+import { useIsFocused } from '@react-navigation/native';
 
 const { width, height } = Dimensions.get('window')
 const Dashboard = ({ navigation, route }) => {
+    const isFocused = useIsFocused();
 
     const dispatch = useDispatch();
     const [picture, setPicture] = useState({});
@@ -37,10 +39,10 @@ const Dashboard = ({ navigation, route }) => {
 
     useEffect(() => {
         return () => {
-            setPicture({})
+            setPicture({});
             setDescription('')
         }
-    }, [])
+    }, [isFocused])
 
     const captureImage = async (type) => {
         let options = {
@@ -64,7 +66,7 @@ const Dashboard = ({ navigation, route }) => {
                     alert(response.customButton);
                 } else {
                     const source = { uri: response.uri };
-                    console.warn(response)
+                    // console.warn(response)
                     console.log('response', JSON.stringify(response));
                     setPicture(response)
                 }
@@ -125,19 +127,25 @@ const Dashboard = ({ navigation, route }) => {
                 postTime: firestore.Timestamp.fromDate(new Date()),
             })
             .then(async () => {
-                console.log('Post Added!');
+                console.log('Image Added!');
                 Alert.alert(
-                    'Post published!',
-                    'Your post has been published Successfully!',
+                    'Image published!',
+                    'Your Image has been published Successfully!',
                 );
                 await navigation.navigate('Lists')
 
-                setPicture({});
-                setDescription('');
+                await setPicture({});
+                await etDescription('');
             })
             ;
     }
-    const { mainContainerStyle, boxeViewStyle, buttonStyle, entriesViewStyle, entriesStyle } = styles;
+    const {
+        mainContainerStyle,
+        boxeViewStyle,
+        buttonStyle,
+        entriesViewStyle,
+        entriesStyle
+    } = styles;
     return (
         <>
             <SafeAreaView style={{ flex: 0, backgroundColor: '#242423' }} />
@@ -268,7 +276,7 @@ const Dashboard = ({ navigation, route }) => {
                             <View>
                                 <View style={{ flexDirection: 'column', }} >
                                     <TouchableOpacity
-                                        onPress={() =>onAdd()}
+                                        onPress={() => onAdd()}
                                         style={buttonStyle} >
                                         <Image
                                             source={Images.icon2}
@@ -277,10 +285,10 @@ const Dashboard = ({ navigation, route }) => {
                                         <Text
                                             style={{
                                                 position: 'absolute',
-                                                letterSpacing:1.5,
+                                                letterSpacing: 1.5,
                                                 fontSize: 11,
                                                 textAlign: 'center',
-                                                top: 28, 
+                                                top: 28,
                                                 left: 19,
                                                 fontFamily: 'CenturyGothic',
                                                 color: 'white',

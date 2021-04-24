@@ -8,9 +8,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import firestore from '@react-native-firebase/firestore'
 
 import { Images } from '../assets'
+import { useIsFocused } from '@react-navigation/native';
 
 const { width, height } = Dimensions.get('window');
 const ImageLists = ({ navigation, route }) => {
+    const isFocused = useIsFocused();
+
     const [data, setData] = useState([])
     const [refresh, setRefresh] = useState(false)
 
@@ -23,13 +26,12 @@ const ImageLists = ({ navigation, route }) => {
 
     useEffect(() => {
         async_data()
-    }, [])
+    }, [isFocused])
 
     const onPressEdit = (item) => {
         navigation.navigate('Edit', {
             item: item,
-            fetch: async_data
-        });
+        })
     }
 
     const fetchImagedata = async () => {

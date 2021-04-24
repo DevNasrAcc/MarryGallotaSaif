@@ -7,15 +7,16 @@ import { Images } from '../assets'
 import { useDispatch, useSelector } from 'react-redux';
 import { addimagedata, updateimagedata } from '../redux/Data_Reducer'
 import firestore from '@react-native-firebase/firestore'
-
+import { useIsFocused } from '@react-navigation/native';
 
 const { width, height } = Dimensions.get('window')
 const Edit = ({ navigation, route }) => {
+    const isFocused = useIsFocused();
     const { item } = route.params.item;
-    console.warn('Colection Id', item.id)
+    // console.warn('Colection Id', item.id)
     const dispatch = useDispatch();
-    const addImageData = (state) => {
-        dispatch(addimagedata(state))
+    const updateImageData = (state) => {
+        dispatch(updateimagedata(state))
     }
 
     const image_data = useSelector((state) => state.DataReducer);
@@ -28,6 +29,7 @@ const Edit = ({ navigation, route }) => {
     else {
         return null
     }
+    // console.warn('Component==>',route.params.getUpdate)
 
     const [picture, setPicture] = useState({});
     const [details, setDetails] = useState();
@@ -45,7 +47,7 @@ const Edit = ({ navigation, route }) => {
             setPicture({})
             setDescription('')
         }
-    }, [])
+    }, [isFocused])
 
     const captureImage = async (type) => {
         let options = {
@@ -128,14 +130,26 @@ const Edit = ({ navigation, route }) => {
                     type: picture.type,
                     description: description,
                 })
-                .then(() => {
+                .then(async () => {
+                    // let list = [];
+                    // await firestore()
+                    //     .collection('Images')
+                    //     .doc(id)
+                    //     .get()
+                    //     .then(querySnapshot => {
+                    //         querySnapshot.forEach(doc => {
+                    //             list.push(doc.data())
+                    //         });
+                    //     });
+                    // updateImageData(list);
+                    // console.warn('list', list);
                     Alert.alert(
                         'Image Updated!',
                         'Your Image has been updated successfully.'
                     );
-                    navigation.navigate('Lists')
+                  await  navigation.navigate('Lists');
                 })
-        }catch (err) {
+        } catch (err) {
             console.log(err)
         }
     }
@@ -146,11 +160,11 @@ const Edit = ({ navigation, route }) => {
                 .collection('Images')
                 .doc(id)
                 .delete()
-                .then(Alert.alert(
+                .then(
+                    console.log(
                     'Post published!',
                     'Your post has been published Successfully!',
                 ));
-            await route.params.fetch()
             await navigation.navigate('Lists')
         }
         catch (err) {
@@ -159,7 +173,14 @@ const Edit = ({ navigation, route }) => {
     };
 
 
-    const { mainContainerStyle, box1ViewStyle, boxViewStyle, buttonStyle, entriesViewStyle, entriesStyle } = styles;
+    const {
+        mainContainerStyle,
+        box1ViewStyle,
+        boxViewStyle,
+        buttonStyle,
+        entriesViewStyle,
+        entriesStyle
+    } = styles;
     return (
         <>
             <SafeAreaView style={{ flex: 0, backgroundColor: '#242423' }} />
