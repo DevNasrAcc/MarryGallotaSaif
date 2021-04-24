@@ -1,6 +1,6 @@
 import 'react-native-gesture-handler';
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, ImageBackground, Dimensions, Image, FlatList } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, ImageBackground, Dimensions, Image, FlatList, ScrollView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { addimagedata } from '../redux/Data_Reducer'
 import { useDispatch, useSelector } from 'react-redux';
@@ -12,22 +12,17 @@ import { Images } from '../assets'
 const { width, height } = Dimensions.get('window');
 const ImageLists = ({ navigation, route }) => {
     const [data, setData] = useState([])
-    const [edit, setEdit] = useState(true)
     const [refresh, setRefresh] = useState(false)
 
     const dispatch = useDispatch();
     const addImageData = (state) => dispatch(addimagedata(state))
 
-    // console.warn('Captured Data==>', data)
-
     const async_data = async () => {
         await fetchImagedata()
     };
+
     useEffect(() => {
         async_data()
-        return () => {
-            setEdit(false)
-        }
     }, [])
 
     const onPressEdit = (item) => {
@@ -57,8 +52,8 @@ const ImageLists = ({ navigation, route }) => {
                         })
                     });
                 })
-            setData(list)
-            addImageData(list);
+            await setData(list)
+            await addImageData(list);
         }
         catch (err) {
             console.log(err)
@@ -153,6 +148,7 @@ const ImageLists = ({ navigation, route }) => {
         desTextStyle,
         descViewStyle,
     } = styles;
+
     return (
         <>
             <SafeAreaView style={{ flex: 0, backgroundColor: '#242423' }} />
@@ -172,15 +168,29 @@ const ImageLists = ({ navigation, route }) => {
                         <View style={{ width: width * 0.5, borderTopWidth: 0.7, borderTopColor: '#595959', alignSelf: "center" }} />
                     </View>
                     <View style={{ flex: 1 }}>
-                        <FlatList
-                            refreshing={refresh}
-                            onRefresh={() => fetchImagedata()}
-                            showsVerticalScrollIndicator={false}
-                            keyExtractor={(item) => item.id}
-                            data={data}
-                            renderItem={(i) => renderList(i)}
+                        {data.length > 0 ?
+                            <FlatList
+                                refreshing={refresh}
+                                onRefresh={() => fetchImagedata()}
+                                showsVerticalScrollIndicator={false}
+                                keyExtractor={(item) => item.id}
+                                data={data}
+                                renderItem={(i) => renderList(i)}
 
-                        />
+                            />
+                            :
+                            <ScrollView
+                                refreshing={refresh}
+                                onRefresh={() => fetchImagedata()}
+                                contentContainerStyle={{ alignItems: 'center', flex: 2, justifyContent: 'center' }}
+                            >
+
+                                <Image source={Images.notfound} style={{ width: 80, height: 80, marginVertical: 10 }} />
+                                <Text style={{ color: 'white', fontFamily: 'CenturyGothic', textAlign: 'center', }}>
+                                    No Data Found...
+                            </Text>
+                            </ScrollView>
+                        }
 
                     </View>
                 </View>

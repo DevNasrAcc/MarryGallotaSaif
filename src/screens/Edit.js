@@ -12,7 +12,7 @@ import firestore from '@react-native-firebase/firestore'
 const { width, height } = Dimensions.get('window')
 const Edit = ({ navigation, route }) => {
     const { item } = route.params.item;
-    console.warn('Colection Id',item.id)
+    console.warn('Colection Id', item.id)
     const dispatch = useDispatch();
     const addImageData = (state) => {
         dispatch(addimagedata(state))
@@ -37,7 +37,6 @@ const Edit = ({ navigation, route }) => {
     const [edit, setEdit] = useState();
 
     useEffect(() => {
-        route.params !== undefined && route.params.edit == true ? setEdit(true) : setEdit(false)
         route.params !== undefined && setPicture(route.params.item.item)
         route.params !== undefined && setDescription(route.params.item.item.des)
 
@@ -60,7 +59,6 @@ const Edit = ({ navigation, route }) => {
         if (isCameraPermitted && isStoragePermitted) {
             launchCamera(options, (response) => {
                 console.log('Response = ', response);
-
                 if (response.didCancel) {
                     console.log('User cancelled image picker');
                 } else if (response.error) {
@@ -116,43 +114,48 @@ const Edit = ({ navigation, route }) => {
         } else return true;
     };
 
-    const updateImagedata = (id) => {
-        console.log('Updated', id)
-        firestore()
-            .collection('Images')
-            .doc(id)
-            .update({
-                filename: picture.fileName,
-                filesize: picture.fileSize,
-                width: picture.width,
-                height: picture.height,
-                fileuri: picture.uri,
-                type: picture.type,
-                description: description,
-            })
-            .then(() => {
-                console.log('Image Data Updated')
-                Alert.alert(
-                    'Image Updated!',
-                    'Your Image has been updated successfully.'
-                );
-                navigation.navigate('Lists')
-
-            })
+    const updateImagedata = async (id) => {
+        try {
+            await firestore()
+                .collection('Images')
+                .doc(id)
+                .update({
+                    filename: picture.fileName,
+                    filesize: picture.fileSize,
+                    width: picture.width,
+                    height: picture.height,
+                    fileuri: picture.uri,
+                    type: picture.type,
+                    description: description,
+                })
+                .then(() => {
+                    Alert.alert(
+                        'Image Updated!',
+                        'Your Image has been updated successfully.'
+                    );
+                    navigation.navigate('Lists')
+                })
+        }catch (err) {
+            console.log(err)
+        }
     }
 
-    const deleteImageData = (id) => {
-        console.log('post delete id ', id)
-        firestore()
-            .collection('Images')
-            .doc(id)
-            .delete()
-            .then(Alert.alert(
-                'Post published!',
-                'Your post has been published Successfully!',
-            ))
-        route.params.fetchImageData
-        navigation.navigate('Lists')
+    const deleteImageData = async (id) => {
+        try {
+            await firestore()
+                .collection('Images')
+                .doc(id)
+                .delete()
+                .then(Alert.alert(
+                    'Post published!',
+                    'Your post has been published Successfully!',
+                ));
+            await route.params.fetch()
+            await navigation.navigate('Lists')
+        }
+        catch (err) {
+            console.error('Error', err)
+        }
     };
 
 

@@ -111,7 +111,7 @@ const Dashboard = ({ navigation, route }) => {
     };
 
 
-    const onAdd = async (state) => {
+    const onAdd = async () => {
         firestore()
             .collection('Images')
             .add({
@@ -124,7 +124,7 @@ const Dashboard = ({ navigation, route }) => {
                 description: description,
                 postTime: firestore.Timestamp.fromDate(new Date()),
             })
-            .then(async() => {
+            .then(async () => {
                 console.log('Post Added!');
                 Alert.alert(
                     'Post published!',
@@ -268,22 +268,24 @@ const Dashboard = ({ navigation, route }) => {
                             <View>
                                 <View style={{ flexDirection: 'column', }} >
                                     <TouchableOpacity
-                                        onPress={async () => {
-                                            let arr = [];
-                                            let mergeData = { ...picture, des: description };
-                                            arr.push(mergeData);
-                                            // console.warn({ ...picture, des: description });
-                                            // onSave({ ...picture, des: description })
-                                            onAdd({ ...picture, des: description })
-                                        }
-                                        }
+                                        onPress={() =>onAdd()}
                                         style={buttonStyle} >
                                         <Image
                                             source={Images.icon2}
                                             style={{ width: 70, height: 70 }} />
 
                                         <Text
-                                            style={{ position: 'absolute', fontSize: 11, textAlign: 'center', top: 28, left: 21, fontFamily: 'CenturyGothic', color: 'white', fontWeight: '700' }}
+                                            style={{
+                                                position: 'absolute',
+                                                letterSpacing:1.5,
+                                                fontSize: 11,
+                                                textAlign: 'center',
+                                                top: 28, 
+                                                left: 19,
+                                                fontFamily: 'CenturyGothic',
+                                                color: 'white',
+                                                fontWeight: '700'
+                                            }}
                                         >
                                             {'SAVE'}
                                         </Text>

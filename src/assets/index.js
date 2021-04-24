@@ -6,4 +6,5 @@ export const Images  = {
     bg: require('./images/BG.png'),
     camera: require('./images/camera.png'),
     edit: require('./icons/edit.png'),
+    notfound: require('./images/nodata.png'),
 }
