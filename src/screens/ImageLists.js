@@ -18,30 +18,22 @@ const ImageLists = ({ navigation, route }) => {
     const dispatch = useDispatch();
     const addImageData = (state) => dispatch(addimagedata(state))
 
-    console.warn('Captured Data==>', data)
+    // console.warn('Captured Data==>', data)
 
-    const async_data = async () => await fetchImagedata()
+    const async_data = async () => {
+        await fetchImagedata()
+    };
     useEffect(() => {
         async_data()
-        // getDetailedData()
         return () => {
             setEdit(false)
         }
     }, [])
-    // const getDetailedData = async () => {
-    //     try {
-    //         const jsonValue = await AsyncStorage.getItem('@imagedata')
-    //         const parseData = jsonValue != null ? JSON.parse(jsonValue) : null;
-    //         await setData(parseData)
-    //     } catch (error) {
-    //         console.warn('Error', error.message)
-    //     }
-    // }
 
-    const onPressEdit = (ite) => {
+    const onPressEdit = (item) => {
         navigation.navigate('Edit', {
-            item: ite,
-            fetchImageData: fetchImagedata
+            item: item,
+            fetch: async_data
         });
     }
 
@@ -55,7 +47,6 @@ const ImageLists = ({ navigation, route }) => {
                 .then(querySnapshot => {
                     querySnapshot.forEach(doc => {
                         const { filename, filesize, fileuri, type, postTime, description, height, width } = doc.data();
-                        // console.log('User ID: ', doc.id, doc.data());
                         list.push({
                             id: doc.id,
                             fileName: filename,
@@ -181,15 +172,15 @@ const ImageLists = ({ navigation, route }) => {
                         <View style={{ width: width * 0.5, borderTopWidth: 0.7, borderTopColor: '#595959', alignSelf: "center" }} />
                     </View>
                     <View style={{ flex: 1 }}>
-                            <FlatList
-                                refreshing={refresh}
-                                onRefresh={() => fetchImagedata()}
-                                showsVerticalScrollIndicator={false}
-                                keyExtractor={(item) => item.id}
-                                data={data}
-                                renderItem={(i) => renderList(i)}
+                        <FlatList
+                            refreshing={refresh}
+                            onRefresh={() => fetchImagedata()}
+                            showsVerticalScrollIndicator={false}
+                            keyExtractor={(item) => item.id}
+                            data={data}
+                            renderItem={(i) => renderList(i)}
 
-                            />
+                        />
 
                     </View>
                 </View>

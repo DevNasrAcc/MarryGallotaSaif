@@ -11,7 +11,8 @@ import firestore from '@react-native-firebase/firestore'
 
 const { width, height } = Dimensions.get('window')
 const Edit = ({ navigation, route }) => {
-    const { item } = route.params.item
+    const { item } = route.params.item;
+    console.warn('Colection Id',item.id)
     const dispatch = useDispatch();
     const addImageData = (state) => {
         dispatch(addimagedata(state))
@@ -119,7 +120,7 @@ const Edit = ({ navigation, route }) => {
         console.log('Updated', id)
         firestore()
             .collection('Images')
-            .doc(id.toString())
+            .doc(id)
             .update({
                 filename: picture.fileName,
                 filesize: picture.fileSize,
@@ -152,8 +153,6 @@ const Edit = ({ navigation, route }) => {
             ))
         route.params.fetchImageData
         navigation.navigate('Lists')
-
-
     };
 
 
@@ -189,7 +188,7 @@ const Edit = ({ navigation, route }) => {
                             </View>
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: 130 }}>
                                 <TouchableOpacity onPress={() => {
-                                    deleteImageData(edit_data.id)
+                                    deleteImageData(item.id)
                                 }}>
                                     <Text style={{ fontFamily: 'CenturyGothic', fontSize: 22, color: 'white', letterSpacing: 2 }}>YES</Text>
                                 </TouchableOpacity>
@@ -318,7 +317,7 @@ const Edit = ({ navigation, route }) => {
                             <View style={{ flexDirection: 'column', marginVertical: 5, alignSelf: "center" }} >
                                 <TouchableOpacity
                                     onPress={async () => {
-                                        updateImagedata(edit_data.id)
+                                        updateImagedata(item.id)
                                     }
                                     }
                                     style={buttonStyle} >
