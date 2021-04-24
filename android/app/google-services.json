@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "14454164121",
+    "project_id": "tpshell-34c74",
+    "storage_bucket": "tpshell-34c74.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:14454164121:android:98fdc18fdcb5bdd87d4608",
+        "android_client_info": {
+          "package_name": "com.marrygallota.tpshell"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "14454164121-b20peqod3dp4ltbn6t5khfs5gglmpqc9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCmaJeTQihC3H77oNG_-Al_XYyxezH2b4s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "14454164121-b20peqod3dp4ltbn6t5khfs5gglmpqc9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
