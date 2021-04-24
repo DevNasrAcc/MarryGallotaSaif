@@ -15,7 +15,7 @@ export default function AppContent() {
   const AppStackScreen = () => {
 
     return (
-      <Stack.Navigator initialRouteName="Lists" headerMode={'none'}>
+      <Stack.Navigator initialRouteName="Home" headerMode={'none'}>
         <Stack.Screen name="Home">
           {(props) => <Dashboard {...props} />}
         </Stack.Screen>
