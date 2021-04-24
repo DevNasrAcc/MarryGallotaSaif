@@ -2,51 +2,89 @@ import 'react-native-gesture-handler';
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, ImageBackground, Dimensions, Image, FlatList } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { addimagedata } from '../redux/Data_Reducer'
+import { useDispatch, useSelector } from 'react-redux';
 
+import firestore from '@react-native-firebase/firestore'
 
 import { Images } from '../assets'
 
 const { width, height } = Dimensions.get('window');
 const ImageLists = ({ navigation, route }) => {
-    const [data, setData] = useState()
+    const [data, setData] = useState([])
     const [edit, setEdit] = useState(true)
+    const [refresh, setRefresh] = useState(false)
+
+    const dispatch = useDispatch();
+    const addImageData = (state) => dispatch(addimagedata(state))
 
     console.warn('Captured Data==>', data)
 
+    const async_data = async () => await fetchImagedata()
     useEffect(() => {
-        getDetailedData()
+        async_data()
+        // getDetailedData()
         return () => {
             setEdit(false)
-            
-
         }
     }, [])
-    const getDetailedData = async () => {
-        try {
-            const jsonValue = await AsyncStorage.getItem('@imagedata')
-            const parseData = jsonValue != null ? JSON.parse(jsonValue) : null;
-            await setData(parseData)
-        } catch (error) {
-            console.warn('Error', error.message)
-        }
+    // const getDetailedData = async () => {
+    //     try {
+    //         const jsonValue = await AsyncStorage.getItem('@imagedata')
+    //         const parseData = jsonValue != null ? JSON.parse(jsonValue) : null;
+    //         await setData(parseData)
+    //     } catch (error) {
+    //         console.warn('Error', error.message)
+    //     }
+    // }
+
+    const onPressEdit = (ite) => {
+        navigation.navigate('Edit', {
+            item: ite,
+            fetchImageData: fetchImagedata
+        });
     }
 
-
+    const fetchImagedata = async () => {
+        try {
+            let list = [];
+            await firestore()
+                .collection('Images')
+                .orderBy('postTime', 'desc')
+                .get()
+                .then(querySnapshot => {
+                    querySnapshot.forEach(doc => {
+                        const { filename, filesize, fileuri, type, postTime, description, height, width } = doc.data();
+                        // console.log('User ID: ', doc.id, doc.data());
+                        list.push({
+                            id: doc.id,
+                            fileName: filename,
+                            fileSize: filesize,
+                            type: type,
+                            uri: fileuri,
+                            des: description,
+                        })
+                    });
+                })
+            setData(list)
+            addImageData(list);
+        }
+        catch (err) {
+            console.log(err)
+        };
+    };
 
     const renderList = (item) => {
-        console.warn('data flate list', item)
-        console.warn('uri flate list', item.item.uri)
         return (
             <View style={listContainer}>
-                <TouchableOpacity style={EditButtonStyle} onPress={() => {
-                    navigation.navigate('Edit', {
-                        item: item,
-                        getDetailedData:getDetailedData
-                    });
-
-                }} >
+                <TouchableOpacity style={EditButtonStyle} onPress={() => onPressEdit(item)} >
                     <Text style={EditButtonTextStyle}>EDIT</Text>
                 </TouchableOpacity>
+                <View style={{ marginHorizontal: 2, flexDirection: 'row' }}>
+                    <View style={{ height: height * 0.05, borderRightWidth: 0.7, borderRightColor: '#595959', alignSelf: "center" }} />
+                    <View style={{ width: width * 0.03, backgroundColor: '#595959', alignSelf: "center", height: 0.7 }} />
+                    <View style={{ height: height * 0.08, borderLeftWidth: 0.7, borderLeftColor: '#595959', alignSelf: "center" }} />
+                </View>
                 <View style={picDetailsStyle}>
                     <View >
                         {item.item.uri == undefined ? <View style={picViewStyle}>
@@ -87,6 +125,11 @@ const ImageLists = ({ navigation, route }) => {
                     </View>
                     <View style={descContainerStyle}>
                         <Text style={desTextStyle}>DESCRIPTION</Text>
+                        <View style={{ marginVertical: 2 }}>
+                            <View style={{ width: width * 0.05, borderBottomWidth: 0.7, borderBottomColor: '#595959', alignSelf: "center" }} />
+                            <View style={{ height: height * 0.015, backgroundColor: '#595959', width: 0.7, alignSelf: "center" }} />
+                            <View style={{ width: width * 0.17, borderTopWidth: 0.7, borderTopColor: '#595959', alignSelf: "center" }} />
+                        </View>
                         <View style={descViewStyle}><Text style={{ color: 'white', fontSize: 10, marginLeft: 5, textAlign: 'left' }}>{item.item.des}</Text></View>
                     </View>
                 </View>
@@ -132,14 +175,22 @@ const ImageLists = ({ navigation, route }) => {
                             style={{ width: 70, height: 70 }}
                         />
                     </TouchableOpacity>
+                    <View style={{ marginVertical: 10, alignItems: 'center', justifyContent: 'center' }}>
+                        <View style={{ width: width * 0.1, borderBottomWidth: 0.7, borderBottomColor: '#595959', alignSelf: "center" }} />
+                        <View style={{ height: height * 0.029, backgroundColor: '#595959', width: 0.7, alignSelf: "center" }} />
+                        <View style={{ width: width * 0.5, borderTopWidth: 0.7, borderTopColor: '#595959', alignSelf: "center" }} />
+                    </View>
                     <View style={{ flex: 1 }}>
-                        <FlatList
-                            showsVerticalScrollIndicator={false}
-                            keyExtractor={(it, ind) => ind}
-                            data={data}
-                            renderItem={(i) => renderList(i)}
+                            <FlatList
+                                refreshing={refresh}
+                                onRefresh={() => fetchImagedata()}
+                                showsVerticalScrollIndicator={false}
+                                keyExtractor={(item) => item.id}
+                                data={data}
+                                renderItem={(i) => renderList(i)}
 
-                        />
+                            />
+
                     </View>
                 </View>
             </SafeAreaView>
@@ -152,10 +203,11 @@ const styles = StyleSheet.create({
     mainContainerStyle: {
         flex: 1,
         alignItems: 'center',
+        justifyContent: "center",
     },
     listContainer: {
         flexDirection: 'row',
-        marginTop: 40,
+        marginTop: 20,
         alignItems: 'center',
         justifyContent: 'space-between',
     },
@@ -186,8 +238,9 @@ const styles = StyleSheet.create({
     },
     picDetailsStyle: {
         flexDirection: 'row',
-        justifyContent: 'space-evenly',
-        width: width * 0.82
+        justifyContent: 'space-around',
+        alignItems: 'center',
+        width: width * 0.73
     },
     picViewStyle: {
         backgroundColor: '#333333',
@@ -204,8 +257,12 @@ const styles = StyleSheet.create({
         fontSize: 11
     },
     detailViewStyle: {
-        flex: 0,
-        justifyContent: 'space-between'
+        flex: 1,
+        height: 80,
+        // backgroundColor: 'white',
+        flexDirection: 'column',
+        justifyContent: 'space-around',
+        alignItems: 'center',
     },
     item1Style: {
         flexDirection: 'row',
@@ -288,7 +345,7 @@ const styles = StyleSheet.create({
     },
     descViewStyle: {
         backgroundColor: '#333333',
-        width: 75, height: 55,
+        width: 75, height: 45,
         borderRadius: 5
     }
 

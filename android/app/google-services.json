@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:14454164121:android:98fdc18fdcb5bdd87d4608",
+        "mobilesdk_app_id": "1:14454164121:android:bd043965565a41247d4608",
         "android_client_info": {
-          "package_name": "com.marrygallota.tpshell"
+          "package_name": "com.marrygallota"
         }
       },
       "oauth_client": [

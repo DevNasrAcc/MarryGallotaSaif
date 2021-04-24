@@ -1,11 +1,26 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, PermissionsAndroid, StyleSheet, SafeAreaView, TouchableOpacity, ImageBackground, Dimensions, Image, TextInput, Alert, } from 'react-native';
+import {
+    View,
+    Text,
+    PermissionsAndroid,
+    StyleSheet,
+    SafeAreaView,
+    KeyboardAvoidingView,
+    ScrollView,
+    TouchableOpacity,
+    ImageBackground,
+    Dimensions,
+    Image,
+    TextInput,
+    Alert,
+} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import Modal from 'react-native-modal';
 import { Images } from '../assets'
 import { useDispatch, useSelector } from 'react-redux';
 import { addimagedata } from '../redux/Data_Reducer'
+import firestore from '@react-native-firebase/firestore'
 
 const { width, height } = Dimensions.get('window')
 const Dashboard = ({ navigation, route }) => {
@@ -19,12 +34,8 @@ const Dashboard = ({ navigation, route }) => {
     const [edit, setEdit] = useState();
 
     const addImageData = (state) => dispatch(addimagedata(state))
-    // const image_data = useSelector((state) => state.DataReducer);
-    // console.warn('DATA REDUCER', image_data)
+
     useEffect(() => {
-        // removeItem()
-        route.params !== undefined && route.params.edit == true ? setEdit(true) : setEdit(false)
-        getData()
         return () => {
             setPicture({})
             setDescription('')
@@ -98,198 +109,189 @@ const Dashboard = ({ navigation, route }) => {
             }
         } else return true;
     };
-    const onSave = async (state) => {
-        try {
-            let  oldData = JSON.parse(await AsyncStorage.getItem('@imagedata'));
-                 oldData = [...oldData,state];
-            if (description != '') {
-                await AsyncStorage.setItem('@imagedata', JSON.stringify(oldData))
-                console.warn('SAVED')
-                await getData()
-                await navigation.navigate('Lists')
-                setPicture({})
-                setDescription('')
-            }
-            else {
-                Alert.alert('Please enter description')
-            }
 
-        } catch (error) {
-            console.warn('Error', error.message)
-        }
-    }
 
-    const getData = async () => {
-        try {
-            const jsonValue = await AsyncStorage.getItem('@imagedata')
-            const data = jsonValue != null ? JSON.parse(jsonValue) : null;
-            addImageData(data);
-            setUpdateData(data)
-        } catch (error) {
-            console.warn('Error', error.message)
-        }
-    };
-
-    const updateImageItem = async (index) => {
-        try {
-            const picturedata = await AsyncStorage.getItem('@imagedata');
-            let pictureItems = JSON.parse(picturedata);
-            // console.warn('pictureItems', pictureItems)
-            index.map(async (it, ind) => {
-                const updatedImageItems = pictureItems.filter(function (e, itemIndex) { return itemIndex !== ind });
-                console.warn('updatedImageItems', updatedImageItems)
-                await AsyncStorage.setItem('@imagedata', JSON.stringify(index));
+    const onAdd = async (state) => {
+        firestore()
+            .collection('Images')
+            .add({
+                filename: picture.fileName,
+                filesize: picture.fileSize,
+                width: picture.width,
+                height: picture.height,
+                fileuri: picture.uri,
+                type: picture.type,
+                description: description,
+                postTime: firestore.Timestamp.fromDate(new Date()),
             })
-            setEdit(false)
-            setTimeout(() => {
-                getData()
-                navigation.navigate('Lists')
-            }, 1000)
+            .then(async() => {
+                console.log('Post Added!');
+                Alert.alert(
+                    'Post published!',
+                    'Your post has been published Successfully!',
+                );
+                await navigation.navigate('Lists')
 
-        } catch (error) {
-            console.log('error: ', error);
-        }
-    };
-
+                setPicture({});
+                setDescription('');
+            })
+            ;
+    }
     const { mainContainerStyle, boxeViewStyle, buttonStyle, entriesViewStyle, entriesStyle } = styles;
     return (
         <>
             <SafeAreaView style={{ flex: 0, backgroundColor: '#242423' }} />
             <SafeAreaView style={{ flex: 1, backgroundColor: '#242423' }}>
-                <ImageBackground source={Images.bg} style={{ width: width, height: height * 0.9 }} >
-                    <View style={mainContainerStyle} >
-                        <View>
-                            <TouchableOpacity
-                                onPress={() => captureImage('photo')}
-                                style={buttonStyle} >
-                                <Image
-                                    source={Images.icon3}
-                                    style={{ width: 70, height: 70 }}
-                                />
-                            </TouchableOpacity>
-                            <View style={{ width: width * 0.15, alignSelf: "center", borderTopColor: '#333', borderTopWidth: 2, marginTop: 5 }} />
-                        </View>
-                        <View style={{ height: 43, width: 2, backgroundColor: '#333333', position: 'absolute', top: height * 0.09, bottom: 0 }} />
-
-                        <View style={{}}>
-                            <View style={{ width: width * 0.5, alignSelf: "center", borderBottomColor: '#333', borderBottomWidth: 2, marginBottom: 5 }} />
-                            <View style={boxeViewStyle}>
-                                {picture.uri ?
-                                    <Image
-                                        source={
-                                            picture.uri != undefined
-                                                ? { uri: picture.uri }
-                                                : '--'
-                                        }
-                                        style={{ height: height * 0.16, width: width * 0.6, borderRadius: 10, }}
-                                    />
-                                    :
-                                    <Text style={{ fontFamily: 'CenturyGothic', letterSpacing: 5, fontSize: 18, color: 'white' }}>
-                                        PICTURE
-                            </Text>}
-                            </View>
-                            <View style={{ width: width * 0.5, alignSelf: "center", borderTopColor: '#333', borderTopWidth: 2, marginTop: 5 }} />
-                        </View>
-                        <View style={{ height: 45, width: 2, backgroundColor: '#333333', position: 'absolute', top: height * 0.315, bottom: 0 }} />
-
-                        <View>
-                            <View style={{ width: width * 0.4, alignSelf: "center", borderBottomColor: '#333', borderBottomWidth: 2, marginBottom: 5 }} />
+                <ImageBackground source={Images.bg} style={{ width: width, height: height }} >
+                    <KeyboardAvoidingView
+                        behavior={Platform.OS === "ios" ? "position" : "height"}
+                        style={{ flex: 1, }}
+                    >
+                        <ScrollView contentContainerStyle={mainContainerStyle} showsVerticalScrollIndicator={false} >
                             <View>
-                                <View style={entriesViewStyle}>
-                                    <Text style={entriesStyle}>{'MARKDOWN'}</Text>
-                                    <View style={{ backgroundColor: '#333333', width: width * 0.28, height: height * 0.018, borderRadius: 4 }} >
-                                        <Text style={{ color: 'white', fontSize: 10, marginLeft: 5, }}>{
-                                            picture.fileName != undefined
-                                                ? picture.fileName
-                                                : '--'
-                                        }</Text>
-                                    </View>
-                                </View>
-                                <View style={entriesViewStyle}>
-                                    <Text style={entriesStyle}>{'BRAND'}</Text>
-                                    <View style={{ backgroundColor: '#333333', width: width * 0.36, height: height * 0.018, borderRadius: 4, }} >
-                                        <Text style={{ color: 'white', fontSize: 10, marginLeft: 5, }}>{
-                                            picture.type
-                                                ? picture.type.split('/').join(' ')
-                                                : '--'}</Text>
-                                    </View>
-                                </View>
-                                <View style={entriesViewStyle}>
-                                    <Text style={entriesStyle}>{'COLOR'}</Text>
-                                    <View style={{ backgroundColor: '#333333', width: width * 0.36, height: height * 0.018, borderRadius: 4 }} >
-                                        <Text style={{ color: 'white', fontSize: 10, marginLeft: 5, }}>{'--'}</Text>
-                                    </View>
-
-                                </View>
-                                <View style={entriesViewStyle}>
-                                    <Text style={entriesStyle}>{'SIZE'}</Text>
-                                    <View style={{ backgroundColor: '#333333', width: width * 0.4, height: height * 0.018, borderRadius: 4, alignItems: 'flex-start', justifyContent: 'center' }}>
-                                        <Text style={{ color: 'white', fontSize: 10, marginLeft: 5, }}>{
-                                            picture.fileSize != undefined
-                                                ? picture.fileSize
-                                                : '--'
-                                        }</Text>
-                                    </View>
-                                </View>
-                            </View>
-                            <View style={{ width: width * 0.4, alignSelf: "center", borderTopColor: '#333', borderTopWidth: 2, marginTop: 5 }} />
-                        </View>
-                        <View style={{ height: 45, width: 2, backgroundColor: '#333333', position: 'absolute', top: height * 0.501, bottom: 0 }} />
-
-                        <View>
-                            <View style={{ width: width * 0.25, alignSelf: "center", borderBottomColor: '#333', borderBottomWidth: 2, marginBottom: 5 }} />
-
-                            <View>
-                                <Text style={{
-                                    fontFamily: 'CenturyGothic',
-                                    letterSpacing: 3,
-                                    fontSize: 11,
-                                    textAlign: 'center',
-                                    color: 'white',
-                                    marginVertical: 5,
-                                }}
-                                >
-                                    Description
-                            </Text>
-                                <View >
-                                    <TextInput
-                                        multiline={true}
-                                        maxLength={1000}
-                                        editable={true}
-                                        type="text"
-                                        value={description ? description : ''}
-                                        onChangeText={(e) => setDescription(e)}
-                                        color={'white'}
-                                        style={[boxeViewStyle, { color: 'white', textAlignVertical: 'top', padding: 5 }]}
-                                    />
-                                </View>
-                            </View>
-                            <View style={{ width: width * 0.45, alignSelf: "center", borderTopColor: '#333', borderTopWidth: 2, marginTop: 5 }} />
-                        </View>
-                        <View style={{ height: 45, width: 2, backgroundColor: '#333333', position: 'absolute', bottom: height * 0.09 }} />
-
-                        <View>
-                            <View style={{ width: width * 0.15, alignSelf: "center", borderBottomColor: '#333', borderBottomWidth: 2, marginBottom: 5 }} />
-                            <View style={{ flexDirection: 'column', }} >
                                 <TouchableOpacity
-                                    onPress={async () => {
-                                        onSave({ ...picture, des: description })
-                                    }
-                                    }
+                                    onPress={() => captureImage('photo')}
                                     style={buttonStyle} >
                                     <Image
-                                        source={Images.icon2}
-                                        style={{ width: 70, height: 70 }} />
-
-                                    <Text
-                                        style={{ position: 'absolute', fontSize: 11, textAlign: 'center', top: 28, left: 21, fontFamily: 'CenturyGothic', color: 'white', fontWeight: '700' }}
-                                    >
-                                        {'SAVE'}
-                                    </Text>
+                                        source={Images.icon3}
+                                        style={{ width: 70, height: 70 }}
+                                    />
                                 </TouchableOpacity>
                             </View>
-                        </View>
-                    </View>
+                            <View style={{ marginVertical: 5 }}>
+                                <View style={{ width: width * 0.15, borderBottomWidth: 0.7, borderBottomColor: '#595959', alignSelf: "center" }} />
+                                <View style={{ height: height * 0.049, backgroundColor: '#595959', width: 0.7, alignSelf: "center" }} />
+                                <View style={{ width: width * 0.5, borderTopWidth: 0.7, borderTopColor: '#595959', alignSelf: "center" }} />
+                            </View>
+
+                            <View style={{}}>
+                                <View style={boxeViewStyle}>
+                                    {picture != undefined || picture != null ?
+                                        <Image
+                                            source={
+                                                picture && picture.uri != undefined
+                                                    ? { uri: picture.uri }
+                                                    : null
+                                            }
+                                            style={{ height: height * 0.16, width: width * 0.6, borderRadius: 10, }}
+                                        />
+                                        :
+                                        <Text style={{ fontFamily: 'CenturyGothic', letterSpacing: 5, fontSize: 18, color: 'white' }}>
+                                            PICTURE
+                                        </Text>
+                                    }
+                                </View>
+                            </View>
+                            <View style={{ marginVertical: 5 }}>
+                                <View style={{ width: width * 0.4, borderBottomWidth: 0.7, borderBottomColor: '#595959', alignSelf: "center" }} />
+                                <View style={{ height: height * 0.049, backgroundColor: '#595959', width: 0.7, alignSelf: "center" }} />
+                                <View style={{ width: width * 0.4, borderTopWidth: 0.7, borderTopColor: '#595959', alignSelf: "center" }} />
+                            </View>
+                            <View>
+                                <View>
+                                    <View style={entriesViewStyle}>
+                                        <Text style={entriesStyle}>{'MARKDOWN'}</Text>
+                                        <View style={{ backgroundColor: '#333333', width: width * 0.28, height: height * 0.016, borderRadius: 3 }} >
+                                            <Text style={{ color: 'white', fontSize: 10, marginLeft: 5, }}>
+                                                {
+                                                    picture != undefined || picture != null || picture != {}
+                                                        ? picture.fileName
+                                                        : '--'
+                                                }</Text>
+                                        </View>
+                                    </View>
+                                    <View style={entriesViewStyle}>
+                                        <Text style={entriesStyle}>{'BRAND'}</Text>
+                                        <View style={{ backgroundColor: '#333333', width: width * 0.36, height: height * 0.016, borderRadius: 3, }} >
+                                            <Text style={{ color: 'white', fontSize: 10, marginLeft: 5, }}>{
+                                                picture != undefined || picture != null || picture != {}
+                                                    ? picture.type && picture.type.split('/').join(' ')
+                                                    : '--'}</Text>
+                                        </View>
+                                    </View>
+                                    <View style={entriesViewStyle}>
+                                        <Text style={entriesStyle}>{'COLOR'}</Text>
+                                        <View style={{ backgroundColor: '#333333', width: width * 0.36, height: height * 0.016, borderRadius: 3 }} >
+                                            <Text style={{ color: 'white', fontSize: 10, marginLeft: 5, }}>{'--'}</Text>
+                                        </View>
+
+                                    </View>
+                                    <View style={entriesViewStyle}>
+                                        <Text style={entriesStyle}>{'SIZE'}</Text>
+                                        <View style={{ backgroundColor: '#333333', width: width * 0.4, height: height * 0.016, borderRadius: 3, alignItems: 'flex-start', justifyContent: 'center' }}>
+                                            <Text style={{ color: 'white', fontSize: 10, marginLeft: 5, }}>{
+                                                picture != undefined || picture != null || picture != {}
+                                                    ? picture.fileSize
+                                                    : '--'
+                                            }</Text>
+                                        </View>
+                                    </View>
+                                </View>
+                            </View>
+                            <View style={{ marginVertical: 5 }}>
+                                <View style={{ width: width * 0.4, borderBottomWidth: 0.7, borderBottomColor: '#595959', alignSelf: "center" }} />
+                                <View style={{ height: height * 0.049, backgroundColor: '#595959', width: 0.7, alignSelf: "center" }} />
+                                <View style={{ width: width * 0.25, borderTopWidth: 0.7, borderTopColor: '#595959', alignSelf: "center" }} />
+                            </View>
+                            <View>
+                                <View>
+                                    <Text style={{
+                                        fontFamily: 'CenturyGothic',
+                                        letterSpacing: 3,
+                                        fontSize: 11,
+                                        textAlign: 'center',
+                                        color: 'white',
+                                        marginVertical: 5,
+                                    }}
+                                    >
+                                        Description
+                            </Text>
+                                    <View >
+                                        <TextInput
+                                            multiline={true}
+                                            maxLength={1000}
+                                            editable={true}
+                                            type="text"
+                                            value={description ? description : ''}
+                                            onChangeText={(e) => setDescription(e)}
+                                            color={'white'}
+                                            style={[boxeViewStyle, { color: 'white', textAlignVertical: 'top', padding: 5 }]}
+                                        />
+                                    </View>
+                                </View>
+                            </View>
+                            <View style={{ marginVertical: 5 }}>
+                                <View style={{ width: width * 0.5, borderBottomWidth: 0.7, borderBottomColor: '#595959', alignSelf: "center" }} />
+                                <View style={{ height: height * 0.049, backgroundColor: '#595959', width: 0.7, alignSelf: "center" }} />
+                                <View style={{ width: width * 0.15, borderTopWidth: 0.7, borderTopColor: '#595959', alignSelf: "center" }} />
+                            </View>
+                            <View>
+                                <View style={{ flexDirection: 'column', }} >
+                                    <TouchableOpacity
+                                        onPress={async () => {
+                                            let arr = [];
+                                            let mergeData = { ...picture, des: description };
+                                            arr.push(mergeData);
+                                            // console.warn({ ...picture, des: description });
+                                            // onSave({ ...picture, des: description })
+                                            onAdd({ ...picture, des: description })
+                                        }
+                                        }
+                                        style={buttonStyle} >
+                                        <Image
+                                            source={Images.icon2}
+                                            style={{ width: 70, height: 70 }} />
+
+                                        <Text
+                                            style={{ position: 'absolute', fontSize: 11, textAlign: 'center', top: 28, left: 21, fontFamily: 'CenturyGothic', color: 'white', fontWeight: '700' }}
+                                        >
+                                            {'SAVE'}
+                                        </Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        </ScrollView>
+                    </KeyboardAvoidingView>
                 </ImageBackground>
             </SafeAreaView>
         </>
@@ -299,10 +301,9 @@ export default Dashboard;
 
 const styles = StyleSheet.create({
     mainContainerStyle: {
-        flex: 1,
         alignItems: 'center',
         justifyContent: 'space-between',
-        // top: 30
+        height: 'auto'
     },
     boxeViewStyle: {
         backgroundColor: '#333333',
