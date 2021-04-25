@@ -40,12 +40,12 @@ AsyncStorage.getItem('@imagedata').then((result) => {
   }
 });
 export default function DataReducer(state = images, action) {
-  console.log('UPDATED REDUX',action.data)
+  // console.log('UPDATED REDUX',action.data)
   switch (action.type) {
     case ADD_IMAGE_DATA:
       return action.data;
     case UPDATE_IMAGE_DATA:
-      console.log('UPDATE_IMAGE_DATA REDUX',action.data)
+      // console.log('UPDATE_IMAGE_DATA REDUX',action.data)
       return action.data;
     case CLEAR_IMAGE_DETAILS:
       return empty;

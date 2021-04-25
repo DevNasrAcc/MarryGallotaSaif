@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, PermissionsAndroid, StyleSheet, SafeAreaView, TouchableOpacity, ImageBackground, Dimensions, Image, TextInput, ScrollView, KeyboardAvoidingView, Alert, } from 'react-native';
+import { View, Text, PermissionsAndroid, StyleSheet, SafeAreaView, TouchableOpacity, ImageBackground, Dimensions, Image, TextInput, ScrollView, KeyboardAvoidingView, Alert, ActivityIndicator, } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import Modal from 'react-native-modal';
@@ -7,18 +7,43 @@ import { Images } from '../assets'
 import { useDispatch, useSelector } from 'react-redux';
 import { addimagedata, updateimagedata } from '../redux/Data_Reducer'
 import firestore from '@react-native-firebase/firestore'
+import storage from '@react-native-firebase/storage';
+
 import { useIsFocused } from '@react-navigation/native';
 
 const { width, height } = Dimensions.get('window')
 const Edit = ({ navigation, route }) => {
+
+
+    const [picture, setPicture] = useState({});
+    const [details, setDetails] = useState();
+    const [description, setDescription] = useState('');
+    const [deleteModal, setDeleteModal] = useState(false);
+    const [updateData, setUpdateData] = useState();
+    const [edit, setEdit] = useState();
+
+    const [image, setImage] = useState(null);
+    const [uploading, setUploading] = useState(false);
+    const [transferred, setTransferred] = useState(0);
+    const [imageUrl, setImageUrl] = useState(null)
     const isFocused = useIsFocused();
-    const { item } = route.params.item;
-    // console.warn('Colection Id', item.id)
     const dispatch = useDispatch();
+
+    useEffect(() => {
+        route.params !== undefined && setPicture(route.params.item.item)
+        route.params !== undefined && setDescription(route.params.item.item.des)
+
+        return () => {
+            setPicture({})
+            setDescription('')
+        }
+    }, [isFocused]);
+
     const updateImageData = (state) => {
         dispatch(updateimagedata(state))
     }
 
+    const { item } = route.params.item;
     const image_data = useSelector((state) => state.DataReducer);
     let edit_data;
     if (image_data !== undefined || image_data !== null) {
@@ -29,25 +54,6 @@ const Edit = ({ navigation, route }) => {
     else {
         return null
     }
-    // console.warn('Component==>',route.params.getUpdate)
-
-    const [picture, setPicture] = useState({});
-    const [details, setDetails] = useState();
-    const [description, setDescription] = useState('');
-    const [deleteModal, setDeleteModal] = useState(false);
-    const [updateData, setUpdateData] = useState();
-    const [edit, setEdit] = useState();
-
-    useEffect(() => {
-        route.params !== undefined && setPicture(route.params.item.item)
-        route.params !== undefined && setDescription(route.params.item.item.des)
-
-
-        return () => {
-            setPicture({})
-            setDescription('')
-        }
-    }, [isFocused])
 
     const captureImage = async (type) => {
         let options = {
@@ -70,9 +76,8 @@ const Edit = ({ navigation, route }) => {
                     alert(response.customButton);
                 } else {
                     const source = { uri: response.uri };
-                    console.warn(response)
-                    console.log('response', JSON.stringify(response));
                     setPicture(response)
+                    uploadImage(response)
                 }
             });
         };
@@ -116,7 +121,61 @@ const Edit = ({ navigation, route }) => {
         } else return true;
     };
 
+    const uploadImage = async (response) => {
+        if (response == null) {
+            return null;
+        }
+        const uploadUri = response.uri;
+        let filename = uploadUri.substring(uploadUri.lastIndexOf('/') + 1);
+
+        // // Add timestamp to File Name
+        const extension = filename.split('.').pop();
+        const name = filename.split('.').slice(0, -1).join('.');
+        filename = name + Date.now() + '.' + extension;
+
+        setUploading(true);
+        setTransferred(0);
+
+        const storageRef = storage().ref(`photos/${filename}`);
+        const task = storageRef.putFile(uploadUri);
+
+        // Set transferred state
+        task.on('state_changed', (taskSnapshot) => {
+            console.log(
+                `${taskSnapshot.bytesTransferred} transferred out of ${taskSnapshot.totalBytes}`,
+            );
+
+            setTransferred(
+                Math.round(taskSnapshot.bytesTransferred / taskSnapshot.totalBytes) *
+                100,
+            );
+        });
+
+        try {
+            await task;
+
+            const url = await storageRef.getDownloadURL();
+
+            setUploading(false);
+            setImage(null);
+
+            Alert.alert(
+                'Image uploaded!',
+                'Your image has been uploaded to the Firebase Cloud Storage Successfully!',
+            );
+            setImageUrl(url)
+            return url;
+
+        } catch (e) {
+            console.log(e);
+            return null;
+        }
+
+    };
+
+
     const updateImagedata = async (id) => {
+        const ImageUrl = await imageUrl;
         try {
             await firestore()
                 .collection('Images')
@@ -126,28 +185,16 @@ const Edit = ({ navigation, route }) => {
                     filesize: picture.fileSize,
                     width: picture.width,
                     height: picture.height,
-                    fileuri: picture.uri,
+                    fileuri: ImageUrl != null ? ImageUrl : picture.uri,
                     type: picture.type,
                     description: description,
                 })
                 .then(async () => {
-                    // let list = [];
-                    // await firestore()
-                    //     .collection('Images')
-                    //     .doc(id)
-                    //     .get()
-                    //     .then(querySnapshot => {
-                    //         querySnapshot.forEach(doc => {
-                    //             list.push(doc.data())
-                    //         });
-                    //     });
-                    // updateImageData(list);
-                    // console.warn('list', list);
                     Alert.alert(
                         'Image Updated!',
                         'Your Image has been updated successfully.'
                     );
-                  await  navigation.navigate('Lists');
+                    await navigation.navigate('Lists');
                 })
         } catch (err) {
             console.log(err)
@@ -162,9 +209,9 @@ const Edit = ({ navigation, route }) => {
                 .delete()
                 .then(
                     console.log(
-                    'Post published!',
-                    'Your post has been published Successfully!',
-                ));
+                        'Post published!',
+                        'Your post has been published Successfully!',
+                    ));
             await navigation.navigate('Lists')
         }
         catch (err) {
@@ -234,19 +281,28 @@ const Edit = ({ navigation, route }) => {
                             <View style={box1ViewStyle}>
                                 <TouchableOpacity onPress={() => captureImage()}>
                                     {edit_data.uri !== undefined || edit_data.uri !== null ?
-                                        <Image
-                                            source={
-                                                picture.uri != undefined
-                                                    ? { uri: picture.uri }
-                                                    : edit_data != undefined || edit_data.uri != null
-                                                        ? { uri: edit_data.uri }
-                                                        : '--'
+                                        <>
+                                            <Image
+                                                source={
+                                                    picture.uri != undefined
+                                                        ? { uri: picture.uri }
+                                                        : edit_data != undefined || edit_data.uri != null
+                                                            ? { uri: edit_data.uri }
+                                                            : '--'
+                                                }
+                                                style={{
+                                                    height: height * 0.2,
+                                                    width: width * 0.8, borderRadius: 15,
+                                                }}
+                                            />
+                                            {
+                                                uploading &&
+                                                <View style={{ position: "absolute", top: 50, left: 100 }}>
+                                                    <Text style={{ color: 'white', fontSize: 10, fontFamily: 'CenturyGothic', letterSpacing: 2, marginBottom: 5 }}>{transferred} % Completed!</Text>
+                                                    <ActivityIndicator size="large" color="#1BB81F" />
+                                                </View>
                                             }
-                                            style={{
-                                                height: height * 0.2,
-                                                width: width * 0.8, borderRadius: 15,
-                                            }}
-                                        />
+                                        </>
                                         :
                                         <Text style={{ fontFamily: 'CenturyGothic', letterSpacing: 5, fontSize: 18, color: 'white' }}>
                                             PICTURE

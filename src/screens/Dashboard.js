@@ -13,6 +13,7 @@ import {
     Image,
     TextInput,
     Alert,
+    ActivityIndicator,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
@@ -21,8 +22,8 @@ import { Images } from '../assets'
 import { useDispatch, useSelector } from 'react-redux';
 import { addimagedata } from '../redux/Data_Reducer'
 import firestore from '@react-native-firebase/firestore'
+import storage from '@react-native-firebase/storage';
 import { useIsFocused } from '@react-navigation/native';
-
 const { width, height } = Dimensions.get('window')
 const Dashboard = ({ navigation, route }) => {
     const isFocused = useIsFocused();
@@ -34,7 +35,10 @@ const Dashboard = ({ navigation, route }) => {
     const [deleteModal, setDeleteModal] = useState(false);
     const [updateData, setUpdateData] = useState();
     const [edit, setEdit] = useState();
-
+    const [image, setImage] = useState(null);
+    const [uploading, setUploading] = useState(false);
+    const [transferred, setTransferred] = useState(0);
+    const [imageUrl, setImageUrl] = useState(null)
     const addImageData = (state) => dispatch(addimagedata(state))
 
     useEffect(() => {
@@ -65,13 +69,12 @@ const Dashboard = ({ navigation, route }) => {
                     console.log('User tapped custom button: ', response.customButton);
                     alert(response.customButton);
                 } else {
-                    const source = { uri: response.uri };
-                    // console.warn(response)
-                    console.log('response', JSON.stringify(response));
                     setPicture(response)
+                    uploadImage(response)
                 }
             });
         };
+
     }
 
     const requestExternalWritePermission = async () => {
@@ -112,8 +115,59 @@ const Dashboard = ({ navigation, route }) => {
         } else return true;
     };
 
+    const uploadImage = async (response) => {
+        if (response == null) {
+            return null;
+        }
+        const uploadUri = response.uri;
+        let filename = uploadUri.substring(uploadUri.lastIndexOf('/') + 1);
+        // // Add timestamp to File Name
+        const extension = filename.split('.').pop();
+        const name = filename.split('.').slice(0, -1).join('.');
+        filename = name + Date.now() + '.' + extension;
+
+        setUploading(true);
+        setTransferred(0);
+
+        const storageRef = storage().ref(`photos/${filename}`);
+        const task = storageRef.putFile(uploadUri);
+
+        // Set transferred state
+        task.on('state_changed', (taskSnapshot) => {
+            console.log(
+                `${taskSnapshot.bytesTransferred} transferred out of ${taskSnapshot.totalBytes}`,
+            );
+
+            setTransferred(
+                Math.round(taskSnapshot.bytesTransferred / taskSnapshot.totalBytes) *
+                100,
+            );
+        });
+
+        try {
+            await task;
+
+            const url = await storageRef.getDownloadURL();
+
+            setUploading(false);
+            setImage(null);
+
+            Alert.alert(
+                'Image uploaded!',
+                'Your image has been uploaded to the Firebase Cloud Storage Successfully!',
+            );
+            setImageUrl(url)
+            return url;
+
+        } catch (e) {
+            console.log(e);
+            return null;
+        }
+
+    };
 
     const onAdd = async () => {
+        const ImageUrl = await imageUrl;
         firestore()
             .collection('Images')
             .add({
@@ -121,7 +175,7 @@ const Dashboard = ({ navigation, route }) => {
                 filesize: picture.fileSize,
                 width: picture.width,
                 height: picture.height,
-                fileuri: picture.uri,
+                fileuri: ImageUrl,
                 type: picture.type,
                 description: description,
                 postTime: firestore.Timestamp.fromDate(new Date()),
@@ -175,14 +229,23 @@ const Dashboard = ({ navigation, route }) => {
                             <View style={{}}>
                                 <View style={boxeViewStyle}>
                                     {picture != undefined || picture != null ?
-                                        <Image
-                                            source={
-                                                picture && picture.uri != undefined
-                                                    ? { uri: picture.uri }
-                                                    : null
+                                        <>
+                                            <Image
+                                                source={
+                                                    picture && picture.uri != undefined
+                                                        ? { uri: picture.uri }
+                                                        : null
+                                                }
+                                                style={{ height: height * 0.16, width: width * 0.6, borderRadius: 10, }}
+                                            />
+                                            {
+                                                uploading &&
+                                                <View style={{ position: "absolute" }}>
+                                                    <Text style={{ color: 'white', fontSize: 10, fontFamily: 'CenturyGothic', letterSpacing: 2, marginBottom: 5 }}>{transferred} % Completed!</Text>
+                                                    <ActivityIndicator size="large" color="#1BB81F" />
+                                                </View>
                                             }
-                                            style={{ height: height * 0.16, width: width * 0.6, borderRadius: 10, }}
-                                        />
+                                        </>
                                         :
                                         <Text style={{ fontFamily: 'CenturyGothic', letterSpacing: 5, fontSize: 18, color: 'white' }}>
                                             PICTURE
