@@ -30,15 +30,15 @@ const Dashboard = ({ navigation, route }) => {
 
     const dispatch = useDispatch();
     const [picture, setPicture] = useState({});
-    const [details, setDetails] = useState();
+    const [markdown, setMarkdown] = useState('')
+    const [brand, setBrand] = useState('')
+    const [size, setSize] = useState('')
+    const [color, setColor] = useState('')
     const [description, setDescription] = useState('');
-    const [deleteModal, setDeleteModal] = useState(false);
-    const [updateData, setUpdateData] = useState();
-    const [edit, setEdit] = useState();
     const [image, setImage] = useState(null);
     const [uploading, setUploading] = useState(false);
     const [transferred, setTransferred] = useState(0);
-    const [imageUrl, setImageUrl] = useState(null)
+    const [imageUrl, setImageUrl] = useState(null);
     const addImageData = (state) => dispatch(addimagedata(state))
 
     useEffect(() => {
@@ -96,6 +96,7 @@ const Dashboard = ({ navigation, route }) => {
             return false;
         } else return true;
     };
+
     const requestCameraPermission = async () => {
         if (Platform.OS === 'android') {
             try {
@@ -171,12 +172,11 @@ const Dashboard = ({ navigation, route }) => {
         firestore()
             .collection('Images')
             .add({
-                filename: picture.fileName,
-                filesize: picture.fileSize,
-                width: picture.width,
-                height: picture.height,
+                markdown: markdown,
+                size: size,
+                color: color,
+                brand: brand,
                 fileuri: ImageUrl,
-                type: picture.type,
                 description: description,
                 postTime: firestore.Timestamp.fromDate(new Date()),
             })
@@ -262,40 +262,35 @@ const Dashboard = ({ navigation, route }) => {
                                 <View>
                                     <View style={entriesViewStyle}>
                                         <Text style={entriesStyle}>{'MARKDOWN'}</Text>
-                                        <View style={{ backgroundColor: '#333333', width: width * 0.28, height: height * 0.016, borderRadius: 3 }} >
-                                            <Text style={{ color: 'white', fontSize: 10, marginLeft: 5, }}>
-                                                {
-                                                    picture != undefined || picture != null || picture != {}
-                                                        ? picture.fileName
-                                                        : '--'
-                                                }</Text>
-                                        </View>
+                                        <TextInput
+                                            style={{ backgroundColor: '#333333', width: width * 0.28, height: height * 0.016, borderRadius: 3, color: 'white' }}
+                                            value={markdown}
+                                            onChangeText={(text) => setMarkdown(text)}
+                                        />
                                     </View>
                                     <View style={entriesViewStyle}>
                                         <Text style={entriesStyle}>{'BRAND'}</Text>
-                                        <View style={{ backgroundColor: '#333333', width: width * 0.36, height: height * 0.016, borderRadius: 3, }} >
-                                            <Text style={{ color: 'white', fontSize: 10, marginLeft: 5, }}>{
-                                                picture != undefined || picture != null || picture != {}
-                                                    ? picture.type && picture.type.split('/').join(' ')
-                                                    : '--'}</Text>
-                                        </View>
+                                        <TextInput
+                                            style={{ backgroundColor: '#333333', width: width * 0.36, height: height * 0.016, borderRadius: 3, color: 'white' }}
+                                            value={brand}
+                                            onChangeText={(text) => setBrand(text)}
+                                        />
                                     </View>
                                     <View style={entriesViewStyle}>
                                         <Text style={entriesStyle}>{'COLOR'}</Text>
-                                        <View style={{ backgroundColor: '#333333', width: width * 0.36, height: height * 0.016, borderRadius: 3 }} >
-                                            <Text style={{ color: 'white', fontSize: 10, marginLeft: 5, }}>{'--'}</Text>
-                                        </View>
-
+                                        <TextInput
+                                            style={{ backgroundColor: '#333333', width: width * 0.36, height: height * 0.016, borderRadius: 3, color: 'white' }}
+                                            value={color}
+                                            onChangeText={(text) => setColor(text)}
+                                        />
                                     </View>
                                     <View style={entriesViewStyle}>
                                         <Text style={entriesStyle}>{'SIZE'}</Text>
-                                        <View style={{ backgroundColor: '#333333', width: width * 0.4, height: height * 0.016, borderRadius: 3, alignItems: 'flex-start', justifyContent: 'center' }}>
-                                            <Text style={{ color: 'white', fontSize: 10, marginLeft: 5, }}>{
-                                                picture != undefined || picture != null || picture != {}
-                                                    ? picture.fileSize
-                                                    : '--'
-                                            }</Text>
-                                        </View>
+                                        <TextInput
+                                            style={{ backgroundColor: '#333333', width: width * 0.4, height: height * 0.016, borderRadius: 3, alignItems: 'flex-start', justifyContent: 'center', color: 'white' }}
+                                            value={size}
+                                            onChangeText={(text) => setSize(text)}
+                                        />
                                     </View>
                                 </View>
                             </View>

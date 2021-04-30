@@ -43,12 +43,13 @@ const ImageLists = ({ navigation, route }) => {
                 .get()
                 .then(querySnapshot => {
                     querySnapshot.forEach(doc => {
-                        const { filename, filesize, fileuri, type, postTime, description, height, width } = doc.data();
+                        const { markdown, size, fileuri, color,brand, postTime, description, } = doc.data();
                         list.push({
                             id: doc.id,
-                            fileName: filename,
-                            fileSize: filesize,
-                            type: type,
+                            markdown: markdown,
+                            size: size,
+                            color: color,
+                            brand: brand,
                             uri: fileuri,
                             des: description,
                         })
@@ -61,6 +62,7 @@ const ImageLists = ({ navigation, route }) => {
             console.log(err)
         };
     };
+    console.warn(data)
 
     const renderList = (item) => {
         return (
@@ -85,28 +87,28 @@ const ImageLists = ({ navigation, route }) => {
                         <View style={item1Style}>
                             <Text style={item1TextStyle}>{'MARKDOWN'}</Text>
                             <View style={item1ViewStyle}>
-                                <Text style={{ color: 'white', fontSize: 8, marginLeft: 5, }}>{item.item.fileName ? item.item.fileName : '--'}</Text>
+                                <Text style={{ color: 'white', fontSize: 8, marginLeft: 5, }}>{item.item.markdown ? item.item.markdown : '--'}</Text>
                             </View>
                         </View>
                         <View style={item2Style}>
                             <Text style={item2TextStyle}>{'BRAND'}</Text>
                             <View style={item2ViewStyle}>
                                 <Text style={{ color: 'white', fontSize: 8, marginLeft: 5, }}>
-                                    {item.item.type ? item.item.type.split('/').join(' ') : '--'}
+                                    {item.item.brand ? item.item.brand : '--'}
                                 </Text>
                             </View>
                         </View>
                         <View style={item3Style}>
                             <Text style={item3TextStyle}>{'COLOR'}</Text>
                             <View style={item3ViewStyle}>
-                                <Text style={{ color: 'white', fontSize: 8, marginLeft: 5, }}>{'--'}</Text>
+                                <Text style={{ color: 'white', fontSize: 8, marginLeft: 5, }}>{item.item.color ? item.item.color : '--'}</Text>
                             </View>
                         </View>
                         <View style={item4Style}>
                             <Text style={item4TextStyle}>{'SIZE'}</Text>
                             <View style={item4ViewStyle}>
                                 <Text style={{ color: 'white', fontSize: 8, marginLeft: 5, }}>
-                                    {item.item.fileSize ? item.item.fileSize : '--'}
+                                    {item.item.size ? item.item.size : '--'}
                                 </Text>
                             </View>
                         </View>

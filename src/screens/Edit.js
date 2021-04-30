@@ -26,10 +26,30 @@ const Edit = ({ navigation, route }) => {
     const [uploading, setUploading] = useState(false);
     const [transferred, setTransferred] = useState(0);
     const [imageUrl, setImageUrl] = useState(null)
+
+    const [markdown, setMarkdown] = useState('')
+    const [brand, setBrand] = useState('')
+    const [size, setSize] = useState('')
+    const [color, setColor] = useState('')
     const isFocused = useIsFocused();
     const dispatch = useDispatch();
 
     useEffect(() => {
+
+        setMarkdown(edit_data !== undefined || edit_data !== null
+            ? edit_data.markdown
+            : '')
+        setBrand(edit_data !== undefined || edit_data != null
+            ? edit_data.color
+            : '')
+        setColor(
+            edit_data !== undefined || edit_data != null
+                ? edit_data.color
+                : '')
+        setSize(edit_data !== undefined || edit_data != null
+            ? edit_data.size
+            : '')
+
         route.params !== undefined && setPicture(route.params.item.item)
         route.params !== undefined && setDescription(route.params.item.item.des)
 
@@ -181,12 +201,11 @@ const Edit = ({ navigation, route }) => {
                 .collection('Images')
                 .doc(id)
                 .update({
-                    filename: picture.fileName,
-                    filesize: picture.fileSize,
-                    width: picture.width,
-                    height: picture.height,
+                    markdown: markdown,
+                    brand: brand,
+                    color: color,
+                    size: size,
                     fileuri: ImageUrl != null ? ImageUrl : picture.uri,
-                    type: picture.type,
                     description: description,
                 })
                 .then(async () => {
@@ -318,49 +337,39 @@ const Edit = ({ navigation, route }) => {
                             <View style={{ width: width * 0.4, borderTopWidth: 0.7, borderTopColor: '#595959', alignSelf: "center" }} />
                         </View>
                         <View>
-                            {/* <View style={{ borderBottomWidth: 1.5, borderBottomColor: '#333333', width: width * 0.4, alignSelf: "center", padding: 10 }} /> */}
                             <View style={{ alignSelf: "center", marginVertical: 5, }}>
                                 <View style={entriesViewStyle}>
                                     <Text style={entriesStyle}>{'MARKDOWN'}</Text>
-                                    <View style={{ backgroundColor: '#333333', width: width * 0.28, height: height * 0.018, borderRadius: 4 }} >
-                                        <Text style={{ color: 'white', fontSize: 10, marginLeft: 5, }}>{
-                                            picture.fileName != undefined
-                                                ? picture.fileName
-                                                : edit_data !== undefined || edit_data !== null
-                                                    ? edit_data.fileName
-                                                    : '--'
-                                        }</Text>
-                                    </View>
+                                    <TextInput
+                                        style={{ backgroundColor: '#333333', width: width * 0.28, height: height * 0.018, borderRadius: 4, fontSize: 10, color: 'white' }}
+                                        value={markdown}
+                                        onChangeText={(text) => setMarkdown(text)}
+
+                                    />
                                 </View>
                                 <View style={entriesViewStyle}>
                                     <Text style={entriesStyle}>{'BRAND'}</Text>
-                                    <View style={{ backgroundColor: '#333333', width: width * 0.36, height: height * 0.018, borderRadius: 4, }} >
-                                        <Text style={{ color: 'white', fontSize: 10, marginLeft: 5, }}>{
-                                            picture.type
-                                                ? picture.type.split('/').join(' ')
-                                                : edit_data !== undefined || edit_data != null
-                                                    ? edit_data.type.split('/').join(' ')
-                                                    : '--'}
-                                        </Text>
-                                    </View>
+                                    <TextInput
+                                        style={{ backgroundColor: '#333333', width: width * 0.36, height: height * 0.018, borderRadius: 4,fontSize: 10, color: 'white' }}
+                                        value={brand}
+                                        onChangeText={(text) => setBrand(text)}
+                                    />
                                 </View>
                                 <View style={entriesViewStyle}>
                                     <Text style={entriesStyle}>{'COLOR'}</Text>
-                                    <View style={{ backgroundColor: '#333333', width: width * 0.36, height: height * 0.018, borderRadius: 4 }} >
-                                        <Text style={{ color: 'white', fontSize: 10, marginLeft: 5, }}>{'--'}</Text>
-                                    </View>
+                                    <TextInput
+                                        style={{ backgroundColor: '#333333', width: width * 0.36, height: height * 0.018, borderRadius: 4, fontSize: 10, color: 'white'}}
+                                        value={color}
+                                        onChangeText={(text) => setColor(text)}
+                                    />
                                 </View>
                                 <View style={entriesViewStyle}>
                                     <Text style={entriesStyle}>{'SIZE'}</Text>
-                                    <View style={{ backgroundColor: '#333333', width: width * 0.4, height: height * 0.018, borderRadius: 4, alignItems: 'flex-start', justifyContent: 'center' }}>
-                                        <Text style={{ color: 'white', fontSize: 10, marginLeft: 5, }}>{
-                                            picture.fileSize != undefined
-                                                ? picture.fileSize
-                                                : edit_data !== undefined || edit_data != null
-                                                    ? edit_data.fileSize
-                                                    : '--'
-                                        }</Text>
-                                    </View>
+                                    <TextInput
+                                        style={{ backgroundColor: '#333333', width: width * 0.4, height: height * 0.018, borderRadius: 4, alignItems: 'flex-start', justifyContent: 'center',fontSize: 10, color: 'white' }}
+                                        value={size}
+                                        onChangeText={(text) => setSize(text)}
+                                    />
                                 </View>
                             </View>
                         </View>
