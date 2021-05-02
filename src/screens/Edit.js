@@ -34,20 +34,30 @@ const Edit = ({ navigation, route }) => {
     const isFocused = useIsFocused();
     const dispatch = useDispatch();
 
-    useEffect(() => {
+    const image_data = useSelector((state) => state.DataReducer);
 
-        setMarkdown(edit_data !== undefined || edit_data !== null
-            ? edit_data.markdown
+    let edit_data;
+        if (image_data !== undefined || image_data !== null) {
+            image_data.map((item, index) => {
+                return edit_data = item
+            })
+        }
+        else {
+            return null
+        }
+    useEffect(() => {
+        setMarkdown(route.params.item !== undefined || route.params.item!== null
+            ? route.params.item.item.markdown
             : '')
-        setBrand(edit_data !== undefined || edit_data != null
-            ? edit_data.brand
+        setBrand(route.params.item !== undefined || route.params.item != null
+            ? route.params.item.item.brand
             : '')
         setColor(
-            edit_data !== undefined || edit_data != null
-                ? edit_data.color
+            route.params.item !== undefined || route.params.item!= null
+                ? route.params.item.item.color
                 : '')
-        setSize(edit_data !== undefined || edit_data != null
-            ? edit_data.size
+        setSize(route.params.item !== undefined || route.params.item!= null
+            ? route.params.item.item.size
             : '')
 
         route.params !== undefined && setPicture(route.params.item.item)
@@ -59,21 +69,12 @@ const Edit = ({ navigation, route }) => {
         }
     }, [isFocused]);
 
+    console.warn(markdown, size, brand, color, description)
+
     const updateImageData = (state) => {
         dispatch(updateimagedata(state))
     }
 
-    const { item } = route.params.item;
-    const image_data = useSelector((state) => state.DataReducer);
-    let edit_data;
-    if (image_data !== undefined || image_data !== null) {
-        image_data.map((item, index) => {
-            return edit_data = item
-        })
-    }
-    else {
-        return null
-    }
 
     const captureImage = async (type) => {
         let options = {
@@ -164,13 +165,11 @@ const Edit = ({ navigation, route }) => {
             console.log(
                 `${taskSnapshot.bytesTransferred} transferred out of ${taskSnapshot.totalBytes}`,
             );
-
             setTransferred(
                 Math.round(taskSnapshot.bytesTransferred / taskSnapshot.totalBytes) *
                 100,
             );
         });
-
         try {
             await task;
 
@@ -215,6 +214,7 @@ const Edit = ({ navigation, route }) => {
                     );
                     await navigation.navigate('Lists');
                 })
+                .catch((error) => console.log(error))
         } catch (err) {
             console.log(err)
         }
@@ -328,7 +328,7 @@ const Edit = ({ navigation, route }) => {
                                         </Text>}
 
                                 </View>
-                                <TouchableOpacity onPress={() => captureImage()} style={{position: "absolute", top: 0, right: 5,}} activeOpacity={0.7} >
+                                <TouchableOpacity onPress={() => captureImage()} style={{ position: "absolute", top: 0, right: 5, }} activeOpacity={0.7} >
                                     <Image source={Images.edit} style={{ width: 25, height: 25, }} onPress={() => console.warn('edite')} />
                                 </TouchableOpacity>
                             </View>
@@ -450,7 +450,7 @@ const Edit = ({ navigation, route }) => {
                             <View style={{ flexDirection: 'column', marginVertical: 5, alignSelf: "center" }} >
                                 <TouchableOpacity
                                     onPress={async () => {
-                                        updateImagedata(item.id)
+                                        updateImagedata(route.params.item.item.id)
                                     }
                                     }
                                     style={buttonStyle} >
