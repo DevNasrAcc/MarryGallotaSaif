@@ -14,6 +14,7 @@ import {
     TextInput,
     Alert,
     ActivityIndicator,
+    Platform,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
@@ -263,7 +264,20 @@ const Dashboard = ({ navigation, route }) => {
                                     <View style={entriesViewStyle}>
                                         <Text style={entriesStyle}>{'MARKDOWN'}</Text>
                                         <TextInput
-                                            style={{ backgroundColor: '#333333', width: width * 0.28, height: height * 0.016, borderRadius: 3, color: 'white' }}
+                                            style={{
+                                                backgroundColor: '#333333', width: width * 0.28,
+                                                ...Platform.select({
+                                                    ios: {
+                                                        height: height * 0.016,
+                                                    },
+                                                    android: {
+                                                        height: 32,
+                                                        lineHeight:5,
+                                                    },
+                                                }),
+                                                borderRadius: 3, color: 'white'
+                                            }}
+
                                             value={markdown}
                                             onChangeText={(text) => setMarkdown(text)}
                                         />
@@ -271,7 +285,21 @@ const Dashboard = ({ navigation, route }) => {
                                     <View style={entriesViewStyle}>
                                         <Text style={entriesStyle}>{'BRAND'}</Text>
                                         <TextInput
-                                            style={{ backgroundColor: '#333333', width: width * 0.36, height: height * 0.016, borderRadius: 3, color: 'white' }}
+                                            style={{
+                                                backgroundColor: '#333333', width: width * 0.36,
+                                                ...Platform.select({
+                                                    ios: {
+                                                        height: height * 0.016,
+                                                    },
+                                                    android: {
+                                                        height: 32,
+                                                        lineHeight:5,
+
+                                                    },
+                                                }),
+                                                borderRadius: 3, color: 'white'
+                                            }}
+
                                             value={brand}
                                             onChangeText={(text) => setBrand(text)}
                                         />
@@ -279,7 +307,21 @@ const Dashboard = ({ navigation, route }) => {
                                     <View style={entriesViewStyle}>
                                         <Text style={entriesStyle}>{'COLOR'}</Text>
                                         <TextInput
-                                            style={{ backgroundColor: '#333333', width: width * 0.36, height: height * 0.016, borderRadius: 3, color: 'white' }}
+                                            style={{
+                                                backgroundColor: '#333333', width: width * 0.36,
+                                                ...Platform.select({
+                                                    ios: {
+                                                        height: height * 0.016,
+                                                    },
+                                                    android: {
+                                                        height: 32,
+                                                        justifyContent: 'center',
+                                                        alignContent: 'center',
+                                                        lineHeight:5,
+                                                    },
+                                                }),
+                                                borderRadius: 3, color: 'white'
+                                            }}
                                             value={color}
                                             onChangeText={(text) => setColor(text)}
                                         />
@@ -287,7 +329,20 @@ const Dashboard = ({ navigation, route }) => {
                                     <View style={entriesViewStyle}>
                                         <Text style={entriesStyle}>{'SIZE'}</Text>
                                         <TextInput
-                                            style={{ backgroundColor: '#333333', width: width * 0.4, height: height * 0.016, borderRadius: 3, alignItems: 'flex-start', justifyContent: 'center', color: 'white' }}
+                                            style={{
+                                                backgroundColor: '#333333', width: width * 0.4,
+                                                ...Platform.select({
+                                                    ios: {
+                                                        height: height * 0.016,
+                                                    },
+                                                    android: {
+                                                        height: 32,
+                                                        lineHeight:5,
+
+                                                    },
+                                                }),
+                                                borderRadius: 3, alignItems: 'flex-start', justifyContent: 'center', color: 'white'
+                                            }}
                                             value={size}
                                             onChangeText={(text) => setSize(text)}
                                         />

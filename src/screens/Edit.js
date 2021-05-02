@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, PermissionsAndroid, StyleSheet, SafeAreaView, TouchableOpacity, ImageBackground, Dimensions, Image, TextInput, ScrollView, KeyboardAvoidingView, Alert, ActivityIndicator, } from 'react-native';
+import { View, Text, PermissionsAndroid, StyleSheet, SafeAreaView, TouchableOpacity, ImageBackground, Dimensions, Image, TextInput, ScrollView, KeyboardAvoidingView, Alert, ActivityIndicator, Platform, } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import Modal from 'react-native-modal';
@@ -40,7 +40,7 @@ const Edit = ({ navigation, route }) => {
             ? edit_data.markdown
             : '')
         setBrand(edit_data !== undefined || edit_data != null
-            ? edit_data.color
+            ? edit_data.brand
             : '')
         setColor(
             edit_data !== undefined || edit_data != null
@@ -181,7 +181,7 @@ const Edit = ({ navigation, route }) => {
 
             Alert.alert(
                 'Image uploaded!',
-                'Your image has been uploaded to the Firebase Cloud Storage Successfully!',
+                'Your image has been uploaded Successfully!',
             );
             setImageUrl(url)
             return url;
@@ -251,7 +251,7 @@ const Edit = ({ navigation, route }) => {
         <>
             <SafeAreaView style={{ flex: 0, backgroundColor: '#242423' }} />
             <SafeAreaView style={{ flex: 1, backgroundColor: '#242423' }}>
-                <Modal transparent={true} isVisible={deleteModal} onBackdropPres={deleteModal} s >
+                <Modal transparent={true} isVisible={deleteModal} onBackdropPres={deleteModal} >
                     <View
                         style={{
                             flex: 1,
@@ -298,7 +298,7 @@ const Edit = ({ navigation, route }) => {
                         <View>
                             <View style={{ borderBottomWidth: 0.7, borderBottomColor: '#595959', width: width * 0.65, alignSelf: "center", padding: 10 }} />
                             <View style={box1ViewStyle}>
-                                <TouchableOpacity onPress={() => captureImage()}>
+                                <View >
                                     {edit_data.uri !== undefined || edit_data.uri !== null ?
                                         <>
                                             <Image
@@ -325,13 +325,15 @@ const Edit = ({ navigation, route }) => {
                                         :
                                         <Text style={{ fontFamily: 'CenturyGothic', letterSpacing: 5, fontSize: 18, color: 'white' }}>
                                             PICTURE
-                                </Text>
+                                        </Text>}
 
-                                    }
+                                </View>
+                                <TouchableOpacity onPress={() => captureImage()} style={{position: "absolute", top: 0, right: 5,}} activeOpacity={0.7} >
+                                    <Image source={Images.edit} style={{ width: 25, height: 25, }} onPress={() => console.warn('edite')} />
                                 </TouchableOpacity>
                             </View>
                         </View>
-                        <View style={{ marginVertical: 5 }}>
+                        <View style={{ marginVertical: 0 }}>
                             <View style={{ width: width * 0.7, borderBottomWidth: 0.7, borderBottomColor: '#595959', alignSelf: "center" }} />
                             <View style={{ height: height * 0.049, backgroundColor: '#595959', width: 0.7, alignSelf: "center" }} />
                             <View style={{ width: width * 0.4, borderTopWidth: 0.7, borderTopColor: '#595959', alignSelf: "center" }} />
@@ -341,7 +343,17 @@ const Edit = ({ navigation, route }) => {
                                 <View style={entriesViewStyle}>
                                     <Text style={entriesStyle}>{'MARKDOWN'}</Text>
                                     <TextInput
-                                        style={{ backgroundColor: '#333333', width: width * 0.28, height: height * 0.018, borderRadius: 4, fontSize: 10, color: 'white' }}
+                                        style={{
+                                            backgroundColor: '#333333', width: width * 0.28,
+                                            ...Platform.select({
+                                                ios: {
+                                                    height: height * 0.018
+                                                },
+                                                android: {
+                                                    height: 32
+                                                }
+                                            }), borderRadius: 4, fontSize: 10, color: 'white'
+                                        }}
                                         value={markdown}
                                         onChangeText={(text) => setMarkdown(text)}
 
@@ -350,7 +362,17 @@ const Edit = ({ navigation, route }) => {
                                 <View style={entriesViewStyle}>
                                     <Text style={entriesStyle}>{'BRAND'}</Text>
                                     <TextInput
-                                        style={{ backgroundColor: '#333333', width: width * 0.36, height: height * 0.018, borderRadius: 4,fontSize: 10, color: 'white' }}
+                                        style={{
+                                            backgroundColor: '#333333', width: width * 0.36,
+                                            ...Platform.select({
+                                                ios: {
+                                                    height: height * 0.018
+                                                },
+                                                android: {
+                                                    height: 32
+                                                }
+                                            }), borderRadius: 4, fontSize: 10, color: 'white'
+                                        }}
                                         value={brand}
                                         onChangeText={(text) => setBrand(text)}
                                     />
@@ -358,7 +380,18 @@ const Edit = ({ navigation, route }) => {
                                 <View style={entriesViewStyle}>
                                     <Text style={entriesStyle}>{'COLOR'}</Text>
                                     <TextInput
-                                        style={{ backgroundColor: '#333333', width: width * 0.36, height: height * 0.018, borderRadius: 4, fontSize: 10, color: 'white'}}
+                                        style={{
+                                            backgroundColor: '#333333', width: width * 0.36,
+                                            ...Platform.select({
+                                                ios: {
+                                                    height: height * 0.018
+                                                },
+                                                android: {
+                                                    height: 32
+                                                }
+                                            }),
+                                            borderRadius: 4, fontSize: 10, color: 'white'
+                                        }}
                                         value={color}
                                         onChangeText={(text) => setColor(text)}
                                     />
@@ -366,20 +399,31 @@ const Edit = ({ navigation, route }) => {
                                 <View style={entriesViewStyle}>
                                     <Text style={entriesStyle}>{'SIZE'}</Text>
                                     <TextInput
-                                        style={{ backgroundColor: '#333333', width: width * 0.4, height: height * 0.018, borderRadius: 4, alignItems: 'flex-start', justifyContent: 'center',fontSize: 10, color: 'white' }}
+                                        style={{
+                                            backgroundColor: '#333333', width: width * 0.4,
+                                            ...Platform.select({
+                                                ios: {
+                                                    height: height * 0.018
+                                                },
+                                                android: {
+                                                    height: 32
+                                                }
+                                            }),
+                                            borderRadius: 4, alignItems: 'flex-start', justifyContent: 'center', fontSize: 10, color: 'white'
+                                        }}
                                         value={size}
                                         onChangeText={(text) => setSize(text)}
                                     />
                                 </View>
                             </View>
                         </View>
-                        <View style={{ marginVertical: 5 }}>
+                        <View style={{ marginVertical: 0 }}>
                             <View style={{ width: width * 0.4, borderBottomWidth: 0.7, borderBottomColor: '#595959', alignSelf: "center" }} />
                             <View style={{ height: height * 0.049, backgroundColor: '#595959', width: 0.7, alignSelf: "center" }} />
                             <View style={{ width: width * 0.23, borderTopWidth: 0.7, borderTopColor: '#595959', alignSelf: "center" }} />
                         </View>
                         <View>
-                            <View style={{ alignSelf: "center", marginVertical: 10 }}>
+                            <View style={{ alignSelf: "center", }}>
                                 <Text style={{ fontFamily: 'CenturyGothic', letterSpacing: 3, fontSize: 11, textAlign: 'center', color: 'white', marginVertical: 5, }}>
                                     Description
                                 </Text>
@@ -421,7 +465,7 @@ const Edit = ({ navigation, route }) => {
                                     </Text>
                                 </TouchableOpacity>
                                 {<TouchableOpacity
-                                    style={{ alignItems: 'center', justifyContent: 'center', marginTop: 5 }}
+                                    style={{ alignItems: 'center', justifyContent: 'center', marginTop: 8 }}
                                     onPress={() => setDeleteModal(!deleteModal)} >
                                     <Text style={{ color: 'white', fontFamily: 'CenturyGothic', letterSpacing: 3, fontSize: 9 }}>DELETE</Text>
                                 </TouchableOpacity>}
