@@ -46,6 +46,10 @@ const Dashboard = ({ navigation, route }) => {
         return () => {
             setPicture({});
             setDescription('')
+            setMarkdown('');
+            setBrand('');
+            setColor('');
+            setSize('');
         }
     }, [isFocused])
 
