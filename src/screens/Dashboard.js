@@ -30,6 +30,7 @@ const Dashboard = ({ navigation, route }) => {
     const isFocused = useIsFocused();
 
     const dispatch = useDispatch();
+    const [loading, setloading] = useState(true)
     const [picture, setPicture] = useState({});
     const [markdown, setMarkdown] = useState('')
     const [brand, setBrand] = useState('')
@@ -174,6 +175,7 @@ const Dashboard = ({ navigation, route }) => {
 
     const onAdd = async () => {
         const ImageUrl = await imageUrl;
+        setloading(false)
         firestore()
             .collection('Images')
             .add({
@@ -191,12 +193,14 @@ const Dashboard = ({ navigation, route }) => {
                     'Image published!',
                     'Your Image has been published Successfully!',
                 );
-                await navigation.navigate('Lists')
+                if (!loading) {
+                    await navigation.navigate('Lists')
+                }
 
                 await setPicture({});
                 await etDescription('');
             })
-            ;
+            .catch(err => console.log(err));
     }
     const {
         mainContainerStyle,
@@ -205,6 +209,7 @@ const Dashboard = ({ navigation, route }) => {
         entriesViewStyle,
         entriesStyle
     } = styles;
+
     return (
         <>
             <SafeAreaView style={{ flex: 0, backgroundColor: '#242423' }} />
@@ -215,6 +220,7 @@ const Dashboard = ({ navigation, route }) => {
                         style={{ flex: 1, }}
                     >
                         <ScrollView contentContainerStyle={mainContainerStyle} showsVerticalScrollIndicator={false} >
+
                             <View>
                                 <TouchableOpacity
                                     onPress={() => captureImage('photo')}
@@ -275,8 +281,8 @@ const Dashboard = ({ navigation, route }) => {
                                                         height: height * 0.016,
                                                     },
                                                     android: {
-                                                        height: 32,
-                                                        lineHeight:5,
+                                                        height: 35,
+                                                        // lineHeight: 5,
                                                     },
                                                 }),
                                                 borderRadius: 3, color: 'white'
@@ -296,8 +302,8 @@ const Dashboard = ({ navigation, route }) => {
                                                         height: height * 0.016,
                                                     },
                                                     android: {
-                                                        height: 32,
-                                                        lineHeight:5,
+                                                        height: 35,
+                                                        // lineHeight: 5,
 
                                                     },
                                                 }),
@@ -318,10 +324,10 @@ const Dashboard = ({ navigation, route }) => {
                                                         height: height * 0.016,
                                                     },
                                                     android: {
-                                                        height: 32,
+                                                        height: 35,
                                                         justifyContent: 'center',
                                                         alignContent: 'center',
-                                                        lineHeight:5,
+                                                        // lineHeight: 5,
                                                     },
                                                 }),
                                                 borderRadius: 3, color: 'white'
@@ -340,8 +346,8 @@ const Dashboard = ({ navigation, route }) => {
                                                         height: height * 0.016,
                                                     },
                                                     android: {
-                                                        height: 32,
-                                                        lineHeight:5,
+                                                        height: 35,
+                                                        // lineHeight: 5,
 
                                                     },
                                                 }),
@@ -415,10 +421,14 @@ const Dashboard = ({ navigation, route }) => {
                                             {'SAVE'}
                                         </Text>
                                     </TouchableOpacity>
+                                    {/* {loading && <View>
+                                        <ActivityIndicator size={25} />
+                                    </View>} */}
                                 </View>
                             </View>
                         </ScrollView>
                     </KeyboardAvoidingView>
+
                 </ImageBackground>
             </SafeAreaView>
         </>

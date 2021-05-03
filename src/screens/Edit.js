@@ -278,7 +278,7 @@ const Edit = ({ navigation, route }) => {
                             </View>
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: 130 }}>
                                 <TouchableOpacity onPress={() => {
-                                    deleteImageData(item.id)
+                                    deleteImageData(route.params.item.item.id)
                                 }}>
                                     <Text style={{ fontFamily: 'CenturyGothic', fontSize: 22, color: 'white', letterSpacing: 2 }}>YES</Text>
                                 </TouchableOpacity>
