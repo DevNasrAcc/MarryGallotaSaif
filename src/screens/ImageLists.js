@@ -43,7 +43,7 @@ const ImageLists = ({ navigation, route }) => {
                 .get()
                 .then(querySnapshot => {
                     querySnapshot.forEach(doc => {
-                        const { markdown, size, fileuri, color,brand, postTime, description, } = doc.data();
+                        const { markdown, size, fileuri, color, brand, postTime, description, } = doc.data();
                         list.push({
                             id: doc.id,
                             markdown: markdown,
@@ -157,7 +157,15 @@ const ImageLists = ({ navigation, route }) => {
         <>
             <SafeAreaView style={{ flex: 0, backgroundColor: '#242423' }} />
             <SafeAreaView style={{ flex: 1, backgroundColor: '#242423' }}>
+
                 <View style={mainContainerStyle}>
+                    <View style={{ flexDirection: 'row', alignSelf: 'flex-start', justifyContent: 'space-between', margin:10 }}>
+                        <TouchableOpacity style={{ marginVertical: 10 }} onPress={() => navigation.goBack()}>
+                            <Image source={Images.left} style={{width:20, height: 20,}} />
+                            {/* <Text>Arrow</Text> */}
+                        </TouchableOpacity>
+                    </View>
+
                     <TouchableOpacity
                         onPress={() => navigation.navigate('Home')}
                         style={buttonStyle}>

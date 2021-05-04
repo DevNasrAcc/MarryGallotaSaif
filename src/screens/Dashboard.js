@@ -174,33 +174,42 @@ const Dashboard = ({ navigation, route }) => {
     };
 
     const onAdd = async () => {
-        const ImageUrl = await imageUrl;
-        setloading(false)
-        firestore()
-            .collection('Images')
-            .add({
-                markdown: markdown,
-                size: size,
-                color: color,
-                brand: brand,
-                fileuri: ImageUrl,
-                description: description,
-                postTime: firestore.Timestamp.fromDate(new Date()),
-            })
-            .then(async () => {
-                console.log('Image Added!');
-                Alert.alert(
-                    'Image published!',
-                    'Your Image has been published Successfully!',
-                );
-                if (!loading) {
-                    await navigation.navigate('Lists')
-                }
+        if (markdown != '' && brand != '' && color != '' && size != '' && description != '') {
 
-                await setPicture({});
-                await etDescription('');
-            })
-            .catch(err => console.log(err));
+            const ImageUrl = await imageUrl;
+            setloading(false)
+            firestore()
+                .collection('Images')
+                .add({
+                    markdown: markdown,
+                    size: size,
+                    color: color,
+                    brand: brand,
+                    fileuri: ImageUrl,
+                    description: description,
+                    postTime: firestore.Timestamp.fromDate(new Date()),
+                })
+                .then(async () => {
+                    console.log('Image Added!');
+                    Alert.alert(
+                        'Image published!',
+                        'Your Image has been published Successfully!',
+                    );
+                    if (!loading) {
+                        await navigation.navigate('Lists')
+                    }
+
+                    await setPicture({});
+                    await etDescription('');
+                })
+                .catch(err => console.log(err));
+        }
+        else {
+            Alert.alert(
+            'Warning',
+            'Please fill up all field',)
+        }
+
     }
     const {
         mainContainerStyle,
@@ -419,6 +428,30 @@ const Dashboard = ({ navigation, route }) => {
                                             }}
                                         >
                                             {'SAVE'}
+                                        </Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        onPress={() => navigation.navigate('Lists')}
+                                        style={buttonStyle} >
+                                        {/* <Image
+                                            source={Images.icon2}
+                                            style={{ width: 70, height: 70 }} /> */}
+
+                                        <Text
+                                            style={{
+                                                // position: 'absolute',
+                                                marginVertical: 10,
+                                                letterSpacing: 1.5,
+                                                fontSize: 11,
+                                                textAlign: 'center',
+                                                // top: 28,
+                                                // left: 19,
+                                                fontFamily: 'CenturyGothic',
+                                                color: 'white',
+                                                fontWeight: '700'
+                                            }}
+                                        >
+                                            {'IMAGES'}
                                         </Text>
                                     </TouchableOpacity>
                                     {/* {loading && <View>
