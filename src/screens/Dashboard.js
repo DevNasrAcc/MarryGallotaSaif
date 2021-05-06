@@ -15,6 +15,7 @@ import {
     Alert,
     ActivityIndicator,
     Platform,
+    // Modal
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
@@ -41,6 +42,7 @@ const Dashboard = ({ navigation, route }) => {
     const [uploading, setUploading] = useState(false);
     const [transferred, setTransferred] = useState(0);
     const [imageUrl, setImageUrl] = useState(null);
+    const [showModal, setShowModal] = useState(false)
     const addImageData = (state) => dispatch(addimagedata(state))
 
     useEffect(() => {
@@ -174,41 +176,45 @@ const Dashboard = ({ navigation, route }) => {
     };
 
     const onAdd = async () => {
-        if (markdown != '' && brand != '' && color != '' && size != '' && description != '') {
+        setShowModal(true)
+        const ImageUrl = await imageUrl;
+        setTimeout(() => {
+            setShowModal(false);
+            if (markdown != '' && brand != '' && color != '' && size != '' && description != '') {
+                setloading(false)
+                firestore()
+                    .collection('Images')
+                    .add({
+                        markdown: markdown,
+                        size: size,
+                        color: color,
+                        brand: brand,
+                        fileuri: ImageUrl,
+                        description: description,
+                        postTime: firestore.Timestamp.fromDate(new Date()),
+                    })
+                    .then(async () => {
+                        console.log('Image Added!');
+                        Alert.alert(
+                            'Image published!',
+                            'Your Image has been published Successfully!',
+                        );
+                        if (!loading) {
+                            await navigation.navigate('Lists')
+                        }
 
-            const ImageUrl = await imageUrl;
-            setloading(false)
-            firestore()
-                .collection('Images')
-                .add({
-                    markdown: markdown,
-                    size: size,
-                    color: color,
-                    brand: brand,
-                    fileuri: ImageUrl,
-                    description: description,
-                    postTime: firestore.Timestamp.fromDate(new Date()),
-                })
-                .then(async () => {
-                    console.log('Image Added!');
-                    Alert.alert(
-                        'Image published!',
-                        'Your Image has been published Successfully!',
-                    );
-                    if (!loading) {
-                        await navigation.navigate('Lists')
-                    }
-
-                    await setPicture({});
-                    await etDescription('');
-                })
-                .catch(err => console.log(err));
-        }
-        else {
-            Alert.alert(
-            'Warning',
-            'Please fill up all field',)
-        }
+                        await setPicture({});
+                        await etDescription('');
+                    })
+                    .catch(err => console.log(err));
+            }
+            else {
+            setShowModal(false);
+                Alert.alert(
+                    'Warning',
+                    'Please fill up all field')
+            }
+        }, 2000)
 
     }
     const {
@@ -461,6 +467,45 @@ const Dashboard = ({ navigation, route }) => {
                             </View>
                         </ScrollView>
                     </KeyboardAvoidingView>
+                    <Modal transparent={true} isVisible={showModal} onBackdropPres={showModal} >
+                        <View
+                            style={{
+                                flex: 1,
+                                justifyContent: 'center',
+                                backgroundColor: 'transparent',
+                                alignItems: 'center',
+                            }}>
+                            <View
+                                style={{
+                                    height: 260,
+                                    width: 260,
+                                    borderRadius: 200,
+                                    paddingVertical: 10,
+                                    justifyContent: 'space-around',
+                                    alignItems: 'center',
+                                    // backgroundColor: '#ffffff',
+                                    // borderWidth: 10,
+                                    // borderColor: '#139245',
+                                }}>
+                                <ActivityIndicator size="large" color="green" />
+                                {/* <View style={{ width: 180, marginTop: 20 }}>
+                                    <Text style={{ fontSize: 22, textAlign: 'center', color: 'white', letterSpacing: 2, fontWeight: '300' }}>
+                                        {'ARE YOU SURE YOU WANT TO DELETE ?'}
+                                    </Text>
+                                </View>
+                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: 130 }}>
+                                    <TouchableOpacity onPress={() => {
+                                        deleteImageData(route.params.item.item.id)
+                                    }}>
+                                        <Text style={{ fontFamily: 'CenturyGothic', fontSize: 22, color: 'white', letterSpacing: 2 }}>YES</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity onPress={() => setShowModal(!showModal)}>
+                                        <Text style={{ fontFamily: 'CenturyGothic', fontSize: 22, color: 'white', letterSpacing: 2 }}>NO</Text>
+                                    </TouchableOpacity>
+                                </View> */}
+                            </View>
+                        </View>
+                    </Modal>
 
                 </ImageBackground>
             </SafeAreaView>
